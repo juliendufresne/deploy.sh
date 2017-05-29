@@ -8,7 +8,7 @@ function display_deploy_help
 
     printf "
 ${yellow}Usage:${reset_foreground}
-  deploy [options] <server-config-file>
+  deploy [options] <config-file> <revision> [<server-name> ...]
 
 ${yellow}Arguments:${reset_foreground}
   ${green}config-file${reset_foreground}    Configuration file used both for build and release
