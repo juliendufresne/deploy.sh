@@ -58,3 +58,7 @@ deploy release [options] <config-file> <archive-file> [<server-name> ...]
 8. Clean old releases.
 
 > Use the `--help` option for more details about this command.
+
+## Advanced features
+
+* [Enhance deployment with hooks](docs/hooks.md)
