@@ -2,7 +2,9 @@
 
 function ensure_shared_links_exists
 {
-    declare -r shared_directory="$1"
+    declare -r server_index=$1
+    declare -r shared_directory="$2"
+    shift
     shift
 
     if verify_shared_links "$shared_directory" true "$@"
@@ -48,12 +50,14 @@ readonly -f "verify_shared_links"
 
 function link_shared_to_release
 {
-    declare -r new_release_directory="$1"
-    declare -r shared_directory="$2"
+    declare -r server_index=$1
+    declare -r new_release_directory="$2"
+    declare -r shared_directory="$3"
     declare current_item_parent_dir
     declare link_name
     declare hostname
     get_hostname "hostname"
+    shift
     shift
     shift
 
@@ -94,8 +98,9 @@ readonly -f "link_shared_to_release"
 
 function activate_release
 {
-    declare -r directory_to_current="$1"
-    declare -r directory_to_sub_release="$2"
+    declare -r server_index=$1
+    declare -r directory_to_current="$2"
+    declare -r directory_to_sub_release="$3"
     declare hostname
     get_hostname "hostname"
 

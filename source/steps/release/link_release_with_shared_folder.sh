@@ -28,7 +28,7 @@ function link_release_with_shared_folder
 
     ${VERBOSE} && action "Linking release with shared items"
     remote_exec_function "link_shared_to_release" "$release_path" "$shared_path" "${DEPLOY_SHARED_ITEMS[@]}" || return $?
-    call_remote_hook "post_link_release_with_shared_folder" || return $?
+    call_remote_hook "post_link_release_with_shared_folder" "$release_path" "$shared_path" || return $?
 
     return 0
 }

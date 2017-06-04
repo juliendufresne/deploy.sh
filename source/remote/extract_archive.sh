@@ -2,9 +2,10 @@
 
 function extract_archive
 {
-    declare -r releases_path="$1"
-    declare -r archive_filename="$2"
-    declare -r release_name="$3"
+    declare -r server_index=$1
+    declare -r releases_path="$2"
+    declare -r archive_filename="$3"
+    declare -r release_name="$4"
 
     declare -r archive_dir="$(basename --suffix=.tar.bz2 "$archive_filename")"
     declare -r output_file="$(mktemp)"

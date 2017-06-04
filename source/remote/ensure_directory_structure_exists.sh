@@ -2,9 +2,10 @@
 
 function ensure_directory_structure_exists
 {
-    declare -r CURRENT_RELEASE_PATH="$1"
-    declare -r RELEASES_ROOT_PATH="$2"
-    declare -r SHARED_ROOT_PATH="$3"
+    declare -r server_index=$1
+    declare -r CURRENT_RELEASE_PATH="$2"
+    declare -r RELEASES_ROOT_PATH="$3"
+    declare -r SHARED_ROOT_PATH="$4"
     declare -r output_file="$(mktemp)"
     declare hostname
     get_hostname "hostname"

@@ -2,9 +2,10 @@
 
 function clean_oldest_releases
 {
-    declare -r -i keep_releases="$1"
-    declare -r release_directory="$2"
-    declare -r link_of_current_release="$3"
+    declare -r server_index=$1
+    declare -r -i keep_releases="$2"
+    declare -r release_directory="$3"
+    declare -r link_of_current_release="$4"
     declare -a releases_to_keep=()
     declare -i return_code=0
     declare current_release_directory="$(readlink -f "$link_of_current_release")"

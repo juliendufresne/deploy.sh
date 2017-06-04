@@ -2,10 +2,11 @@
 
 function delete_application
 {
-    declare -r deploy_to="$1"
-    declare -r current_release_path="$2"
-    declare -r release_root_path="$3"
-    declare -r shared_root_path="$4"
+    declare -r server_index=$1
+    declare -r deploy_to="$2"
+    declare -r current_release_path="$3"
+    declare -r release_root_path="$4"
+    declare -r shared_root_path="$5"
     declare hostname
     get_hostname "hostname"
     declare -r output_file="$(mktemp)"

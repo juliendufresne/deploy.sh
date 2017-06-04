@@ -69,6 +69,7 @@ readonly -f "remote_exec_command_on_server_name"
 function remote_exec_function
 {
     declare -r function_name="$1"
+    declare -i server_index=0
     shift
 
     remote_exec_ensure_var_exists || return $?
@@ -89,11 +90,12 @@ function remote_exec_function
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
+        server_index=$((server_index + 1))
 
         ssh "${ssh_command_options[@]}" "$server" bash -c "'
 #!/usr/bin/env bash
 source "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}"
-${function_name} $@ || exit \"\$?\"
+${function_name} $server_index $@ || exit \"\$?\"
 '" || return $?
     done
 
