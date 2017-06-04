@@ -11,7 +11,7 @@ function push_file_to_servers_ensure_var_exists
             VERY_VERBOSE=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
@@ -24,11 +24,11 @@ function push_file_to_servers_ensure_var_exists
             DEPLOY_RSYNC_OPTIONS=()
             error "Something unexpected happened: $defined_variable_name should be defined and should be an array"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "push_file_to_servers_ensure_var_exists"
 
@@ -37,15 +37,15 @@ function push_file_to_servers
     declare -r file="$1"
     declare -r destination="$2"
 
-    push_file_to_servers_ensure_var_exists || return "$?"
+    push_file_to_servers_ensure_var_exists || return $?
 
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
-        push_file_to_server "$server" "$file" "$destination" "$deploy_ssh_server" || return "1"
+        push_file_to_server "$server" "$file" "$destination" "$deploy_ssh_server" || return 1
     done
 
-    return "0"
+    return 0
 }
 readonly -f "push_file_to_servers"
 
@@ -59,7 +59,7 @@ function push_file_to_server
     declare regex='^[0-9]+$'
     [[ "$server_name" =~ $regex ]] && server_name="#$server_name"
 
-    push_file_to_servers_ensure_var_exists || return "$?"
+    push_file_to_servers_ensure_var_exists || return $?
 
     declare -a rsync_options=("--safe-links" "--executability")
     ${VERY_VERBOSE} || rsync_options+=("--quiet")
@@ -73,18 +73,18 @@ function push_file_to_server
     rsync "${rsync_options[@]}" "$file" "$server:$destination" &>"$output_file" || {
         error "Unable to send file to server $server_name"
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
         cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     }
 
     ${DEBUG} && cat "$output_file"
 
     rm "$output_file"
 
-    return "0"
+    return 0
 }
 readonly -f "push_file_to_server"

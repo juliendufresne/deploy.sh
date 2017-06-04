@@ -13,7 +13,7 @@ function init_custom_hooks
         CUSTOM_HOOKS["post_link_release_with_shared_folder"]=""
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "init_custom_hooks"
 
@@ -26,8 +26,8 @@ function add_hook
     declare -r hook_name="$1"
     shift
 
-    init_custom_hooks || return "$?"
-    check_hook_name "$hook_name" || return "$?"
+    init_custom_hooks || return $?
+    check_hook_name "$hook_name" || return $?
 
     for user_defined_function_name in "$@"
     do
@@ -47,31 +47,31 @@ readonly -f "add_hook"
 function call_hook
 {
     declare -r hook_name="$1"
-    declare -i return_code="0"
+    declare -i return_code=0
     shift
 
-    init_custom_hooks || return "$?"
-    check_hook_name "$hook_name" || return "$?"
+    init_custom_hooks || return $?
+    check_hook_name "$hook_name" || return $?
 
     if [[ "${#CUSTOM_HOOKS[$hook_name]}" -eq 0 ]]
     then
-        return "0"
+        return 0
     fi
 
     IFS=";" read -ra hooks <<< "${CUSTOM_HOOKS[$hook_name]}"
 
     for user_defined_function_name in "${hooks[@]}"
     do
-        check_user_defined_function_exists "$user_defined_function_name" || return "$?"
+        check_user_defined_function_exists "$user_defined_function_name" || return $?
         ${user_defined_function_name} "$@" || {
-            return_code="$?"
+            return_code=$?
             error "hook $hook_name: Something went wrong while calling function named $user_defined_function_name"
 
-            return "$return_code"
+            return ${return_code}
         }
     done
 
-    return "0"
+    return 0
 }
 readonly -f "call_hook"
 
@@ -81,15 +81,15 @@ readonly -f "call_hook"
 function call_remote_hook
 {
     declare -r hook_name="$1"
-    declare -i return_code="0"
+    declare -i return_code=0
     shift
 
-    init_custom_hooks || return "$?"
-    check_hook_name "$hook_name" || return "$?"
+    init_custom_hooks || return $?
+    check_hook_name "$hook_name" || return $?
 
     if [[ "${#CUSTOM_HOOKS[$hook_name]}" -eq 0 ]]
     then
-        return "0"
+        return 0
     fi
 
     IFS=";" read -ra hooks <<< "${CUSTOM_HOOKS[$hook_name]}"
@@ -97,14 +97,14 @@ function call_remote_hook
     for user_defined_function_name in "${hooks[@]}"
     do
         remote_exec_function "$user_defined_function_name" "$@" || {
-            return_code="$?"
+            return_code=$?
             error "hook $hook_name: Something went wrong while calling function named $user_defined_function_name"
 
-            return "$return_code"
+            return ${return_code}
         }
     done
 
-    return "0"
+    return 0
 }
 readonly -f "call_remote_hook"
 
@@ -116,10 +116,10 @@ function check_hook_name
     then
         error "${FUNCNAME[1]}: Unknown hook name '$hook_name'"
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "check_hook_name"
 
@@ -131,9 +131,9 @@ function check_user_defined_function_exists
     then
         error "${FUNCNAME[1]}: Unknown function name '$user_defined_function_name'"
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "check_user_defined_function_exists"

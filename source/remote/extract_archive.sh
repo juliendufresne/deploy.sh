@@ -15,23 +15,23 @@ function extract_archive
     cd "$releases_path" &>"$output_file" || {
         error "Server $hostname: Unable to enter release directory $releases_path."
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
-        cat "$output_file" >&2
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
+        >&2 cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     }
 
     tar --extract --file "$archive_filename" &>"$output_file" || {
         error "Server $hostname: Unable to extract archive $archive_filename."
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
-        cat "$output_file" >&2
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
+        >&2 cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     }
 
     if [[ "$archive_dir" != "$release_name" ]]
@@ -39,27 +39,27 @@ function extract_archive
         mv "$archive_dir" "$release_name" &>"$output_file" || {
             error "Server $hostname: Unable to move extracted archive $archive_dir in $release_name."
     
-            printf >&2 'Following is the output of the command\n'
-            printf >&2 '######################################\n'
-            cat "$output_file" >&2
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
+            >&2 cat "$output_file"
             rm "$output_file"
     
-            return "1"
+            return 1
         }
     fi
 
     rm "$archive_filename" &>"$output_file" || {
         error "Server $hostname: Unable to remove archive $archive_filename."
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
-        cat "$output_file" >&2
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
+        >&2 cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     }
 
     rm "$output_file"
 
-    return "0"
+    return 0
 }

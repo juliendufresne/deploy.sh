@@ -91,7 +91,8 @@ function main
                     case "$option" in
                         -h|--help)
                             display_main_help
-                            return "0"
+
+                            return 0
                         ;;
                     esac
                 done
@@ -100,26 +101,26 @@ function main
 
     case "$command_name" in
         "build")
-            build "$@" || return "$?"
+            build "$@" || return $?
             ;;
         "delete")
-            delete "$@" || return "$?"
+            delete "$@" || return $?
             ;;
         "deploy")
-            deploy "$@" || return "$?"
+            deploy "$@" || return $?
             ;;
         "release")
-            release "$@" || return "$?"
+            release "$@" || return $?
             ;;
         *)
             # should not be possible except if developer add a new command in the previous section and did not handle it here
             error "Unknown command $command_name"
 
-            return "1"
+            return 1
             ;;
     esac
 
-    return "0"
+    return 0
 }
 readonly -f "main"
 

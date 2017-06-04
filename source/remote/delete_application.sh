@@ -18,12 +18,12 @@ function delete_application
         rm --preserve-root "$current_release_path" &>"${output_file}" || {
             error "Server $hostname: Unable to remove current release path $current_release_path."
 
-            printf >&2 'Following is the output of the command\n'
-            printf >&2 '######################################\n'
-            cat "$output_file" >&2
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
+            >&2 cat "$output_file"
             rm "$output_file"
 
-            return "1"
+            return 1
         }
     fi
 
@@ -34,12 +34,12 @@ function delete_application
         rm --preserve-root --recursive "$release_root_path" &>"${output_file}" || {
             error "Server $hostname: Unable to remove release root path $release_root_path."
 
-            printf >&2 'Following is the output of the command\n'
-            printf >&2 '######################################\n'
-            cat "$output_file" >&2
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
+            >&2 cat "$output_file"
             rm "$output_file"
 
-            return "1"
+            return 1
         }
     fi
 
@@ -49,12 +49,12 @@ function delete_application
         rm --preserve-root --recursive "$shared_root_path" &>"${output_file}" || {
             error "Server $hostname: Unable to remove shared root path $shared_root_path."
 
-            printf >&2 'Following is the output of the command\n'
-            printf >&2 '######################################\n'
-            cat "$output_file" >&2
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
+            >&2 cat "$output_file"
             rm "$output_file"
 
-            return "1"
+            return 1
         }
     fi
 
@@ -74,12 +74,12 @@ function delete_application
             rm --preserve-root --recursive "$deploy_to" &>"${output_file}" || {
                 error "Server $hostname: Unable to remove deploy_to path $deploy_to."
 
-                printf >&2 'Following is the output of the command\n'
-                printf >&2 '######################################\n'
-                cat "$output_file" >&2
+                >&2 printf 'Following is the output of the command\n'
+                >&2 printf '######################################\n'
+                >&2 cat "$output_file"
                 rm "$output_file"
 
-                return "1"
+                return 1
             }
         fi
 
@@ -87,6 +87,6 @@ function delete_application
 
     rm "$output_file"
 
-    return "0"
+    return 0
 }
 

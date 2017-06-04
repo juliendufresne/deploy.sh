@@ -12,7 +12,7 @@ function command_line_parse_single_option
         display_release_usage
         error "$error_prefix: value required."
 
-        return "1"
+        return 1
     fi
 
     if [[ -n "$_ref" ]]
@@ -20,11 +20,11 @@ function command_line_parse_single_option
         usage
         error "$error_prefix: Can not specify more than one value."
 
-        return "1"
+        return 1
     fi
 
     _ref="$new_value"
 
-    return "0"
+    return 0
 }
 readonly -f "command_line_parse_single_option"

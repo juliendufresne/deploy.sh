@@ -11,19 +11,19 @@ function create_archive_ensure_var_exists
             DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "create_archive_ensure_var_exists"
 
 function create_archive
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     ${VERBOSE} && action "Creating archive"
-    create_archive_ensure_var_exists || return "$?"
+    create_archive_ensure_var_exists || return $?
 
     declare -r workspace="$1"
     declare -r archive_dir="$2"
@@ -46,7 +46,7 @@ function create_archive
             cat "$output_file"
             rm "$output_file"
 
-            return "1"
+            return 1
         }
     fi
 
@@ -54,18 +54,18 @@ function create_archive
     tar "${tar_options[@]}" --file "$archive_file" "$directory_name" &>"$output_file" || {
         error "Something went wrong while creating the archive"
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
         cat "$output_file"
         rm "$output_file"
         cd "$OLDPWD"
 
-        return "1"
+        return 1
     }
 
     rm "$output_file"
     cd "$OLDPWD"
 
-    return "0"
+    return 0
 }
 readonly -f "create_archive"

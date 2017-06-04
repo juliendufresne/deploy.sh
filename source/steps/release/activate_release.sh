@@ -6,9 +6,9 @@ function activate_release
     declare -r release_path="$2"
 
     ${VERBOSE} && action "Activating release"
-    remote_exec_function "activate_release" "$current_path" "$release_path" || return "$?"
+    remote_exec_function "activate_release" "$current_path" "$release_path" || return $?
 
-    return "0"
+    return 0
 
 }
 readonly -f "activate_release"

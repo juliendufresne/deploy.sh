@@ -53,7 +53,7 @@ readonly -f "build_cleanup"
 
 function build
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
 
     trap build_cleanup INT TERM EXIT
     declare revision
@@ -69,15 +69,15 @@ function build
     generate_revision_file "$workspace" "$revision" && \
     call_hook "build" "$workspace" "$revision" && \
     create_archive "$workspace" "$archive_dir" || {
-        declare -r -i return_code="$?"
+        declare -r -i return_code=$?
 
         printf "\n"
         display_build_usage
         printf "\n"
 
-        return "$return_code"
+        return ${return_code}
     }
 
-    return "0"
+    return 0
 }
 readonly -f "build"

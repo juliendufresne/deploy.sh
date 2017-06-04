@@ -46,15 +46,15 @@ function delete
     ssh_test_connection && \
     action "Deleting application on servers" && \
     remote_exec_function "delete_application" "$deploy_path" "$current_path" "$releases_path" "$shared_path" || {
-        declare -r -i return_code="$?"
+        declare -r -i return_code=$?
 
         printf "\n"
         delete_usage
         printf "\n"
 
-        return "$return_code"
+        return ${return_code}
     }
 
-    return "0"
+    return 0
 }
 readonly -f "delete"

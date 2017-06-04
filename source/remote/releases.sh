@@ -6,7 +6,7 @@ function clean_oldest_releases
     declare -r release_directory="$2"
     declare -r link_of_current_release="$3"
     declare -a releases_to_keep=()
-    declare -i return_code="0"
+    declare -i return_code=0
     declare current_release_directory="$(readlink -f "$link_of_current_release")"
     declare hostname
     get_hostname "hostname"
@@ -49,12 +49,12 @@ function clean_oldest_releases
         fi
 
         rm --recursive --preserve-root "$directory" || {
-            return_code="$?"
+            return_code=$?
             error "Server $hostname: Unable to remove release $directory."
         }
     done < <(ls -1 --directory */ | sed 's/\/$//' | sort --general-numeric-sort --reverse)
 
     cd "$OLDPWD"
 
-    return "$return_code"
+    return ${return_code}
 }

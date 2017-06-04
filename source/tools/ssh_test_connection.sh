@@ -12,7 +12,7 @@ function ssh_test_connection_ensure_var_exists
             DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
@@ -25,19 +25,19 @@ function ssh_test_connection_ensure_var_exists
             DEPLOY_SSH_OPTIONS=()
             error "Something unexpected happened: $defined_variable_name should be defined and should be an array"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "ssh_test_connection_ensure_var_exists"
 
 function ssh_test_connection
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     ${VERBOSE} && action "Testing remote server connectivity"
-    ssh_test_connection_ensure_var_exists || return "$?"
+    ssh_test_connection_ensure_var_exists || return $?
 
     declare output_file="$(mktemp)"
     declare -a ssh_command_options=("-vvv" "-T")
@@ -59,16 +59,16 @@ function ssh_test_connection
         then
             error "Unable to connect to server $server_name."
 
-            printf >&2 'Following is the output of the command\n'
-            printf >&2 '######################################\n'
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
             cat "$output_file"
             rm "$output_file"
 
-            return "1"
+            return 1
         fi
     done
     rm "$output_file"
 
-    return "0"
+    return 0
 }
 readonly -f "ssh_test_connection"

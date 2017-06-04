@@ -11,19 +11,19 @@ function generate_revision_file_ensure_var_exists
             DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "generate_revision_file_ensure_var_exists"
 
 function generate_revision_file
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     ${VERBOSE} && action "Generating .REVISION file"
-    generate_revision_file_ensure_var_exists || return "$?"
+    generate_revision_file_ensure_var_exists || return $?
 
     declare -r workspace="$1"
     declare -r revision="$2"
@@ -33,16 +33,16 @@ function generate_revision_file
     printf "%s\n" "$revision" > "$file" 2>"$output_file" || {
         error "Unable to create revision file $file."
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
         cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     }
     rm "$output_file"
 
-    return "0"
+    return 0
 }
 
 readonly -f "generate_revision_file"

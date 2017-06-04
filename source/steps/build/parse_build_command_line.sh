@@ -2,7 +2,7 @@
 
 function parse_build_command_line
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     declare -n option_revision="$1"
     declare -n option_archive_dir="$2"
     declare -n option_repository_path="$3"
@@ -44,40 +44,40 @@ function parse_build_command_line
                 DEBUG=true
                 ;;
             --archive-dir=*)
-                command_line_parse_single_option "option --archive-dir" "option_archive_dir" "$option_archive_dir" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --archive-dir" "option_archive_dir" "$option_archive_dir" "${1#*=}" || return $?
                 ;;
             -a|--archive-dir)
-                command_line_parse_single_option "option --archive-dir" "option_archive_dir" "$option_archive_dir" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --archive-dir" "option_archive_dir" "$option_archive_dir" "${2:-}" || return $?
                 shift
                 ;;
             --config-file=*)
-                command_line_parse_single_option "option --config-file" "option_config_file" "$option_config_file" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --config-file" "option_config_file" "$option_config_file" "${1#*=}" || return $?
                 ;;
             -f|--config-file)
-                command_line_parse_single_option "option --config-file" "option_config_file" "$option_config_file" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --config-file" "option_config_file" "$option_config_file" "${2:-}" || return $?
                 shift
                 ;;
             --repository-path=*)
-                command_line_parse_single_option "option --repository-path" "option_repository_path" "$option_repository_path" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --repository-path" "option_repository_path" "$option_repository_path" "${1#*=}" || return $?
                 ;;
             -p|--repository-path)
-                command_line_parse_single_option "option --repository-path" "option_repository_path" "$option_repository_path" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --repository-path" "option_repository_path" "$option_repository_path" "${2:-}" || return $?
                 shift
                 ;;
             --repository-url=*)
-                command_line_parse_single_option "option --repository-url" "option_repository_url" "$option_repository_url" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --repository-url" "option_repository_url" "$option_repository_url" "${1#*=}" || return $?
                 ;;
             -u|--repository-url)
-                command_line_parse_single_option "option --repository-url" "option_repository_url" "$option_repository_url" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --repository-url" "option_repository_url" "$option_repository_url" "${2:-}" || return $?
                 shift
                 ;;
             -*)
                 error "Unknown option $1"
 
-                return "1"
+                return 1
                 ;;
             *)
-                command_line_parse_single_option "argument <revision>" "option_revision" "$option_revision" "$1" || return "$?"
+                command_line_parse_single_option "argument <revision>" "option_revision" "$option_revision" "$1" || return $?
                 ;;
         esac
         shift
@@ -103,9 +103,9 @@ function parse_build_command_line
 
     # finally, check that variable are good
 
-    build_option_resolve_git_repository "$option_repository_path" "option_repository_url" || return "$?"
-    build_option_resolve_revision "$option_repository_path" "$option_repository_url" "option_revision" || return "$?"
-    build_option_resolve_archive_dir "option_archive_dir" || return "$?"
+    build_option_resolve_git_repository "$option_repository_path" "option_repository_url" || return $?
+    build_option_resolve_revision "$option_repository_path" "$option_repository_url" "option_revision" || return $?
+    build_option_resolve_archive_dir "option_archive_dir" || return $?
 
     if ${DEBUG}
     then
@@ -131,7 +131,7 @@ Resolved inputs
 "
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "parse_build_command_line"
 
@@ -143,16 +143,16 @@ function build_option_load_config_file
     then
         error "option --config-file: file \"$file\" not found."
 
-        return "1"
+        return 1
     fi
 
     source "$file" || {
         error "option --config-file: Something went wrong while reading file \"$file\"."
 
-        return "1"
+        return 1
     }
 
-    return "0"
+    return 0
 }
 readonly -f "build_option_load_config_file"
 
@@ -175,7 +175,7 @@ There are multiple ways to define it:
 
         printf >&2 "\nNote: This option will also be used if the path correspond to a git server (initialised with --bare or --mirror).\n"
 
-        return "1"
+        return 1
     fi
 
     if [[ -z "$_ref_option_repository_url" ]]
@@ -197,11 +197,11 @@ There are multiple ways to define it:
 
             printf >&2 "\nNote: You can also use a local bare repository. In this case, create it and specify its path in the --repository-path option."
 
-            return "1"
+            return 1
         fi
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "build_option_resolve_git_repository"
 
@@ -215,7 +215,7 @@ function build_option_resolve_revision
     then
         error "Missing argument <revision>"
 
-        return "1"
+        return 1
     fi
 
     # special case: the local repository is a bare repository so we trust its content
@@ -225,12 +225,12 @@ function build_option_resolve_revision
         then
             error "<revision>: The revision $_option_revision does not correspond to any commit, branch or tag in the repository."
 
-            return "1"
+            return 1
         fi
 
         _option_revision="$(git --git-dir "$option_repository_path" show-ref "$_option_revision" | head -n "1" | awk '{ print $1 }')"
 
-        return "0"
+        return 0
     fi
 
     if ! git ls-remote --exit-code --refs "$option_repository_url" "$_option_revision" &>/dev/null
@@ -244,12 +244,12 @@ function build_option_resolve_revision
             error "<revision>: The revision $_option_revision does not correspond to any commit, branch or tag in the repository."
         fi
 
-        return "1"
+        return 1
     fi
 
     _option_revision="$(git ls-remote --exit-code --refs "$option_repository_url" "$_option_revision" | head -n "1" | awk '{ print $1 }')"
 
-    return "0"
+    return 0
 }
 readonly -f "build_option_resolve_revision"
 
@@ -262,6 +262,6 @@ function build_option_resolve_archive_dir
         _ref="$(mktemp --directory --dry-run)"
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "build_option_resolve_archive_dir"

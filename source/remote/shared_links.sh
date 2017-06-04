@@ -7,7 +7,7 @@ function ensure_shared_links_exists
 
     if verify_shared_links "$shared_directory" true "$@"
     then
-        return "0"
+        return 0
     fi
 
     call_hook "create_shared_links" "$shared_directory"
@@ -16,10 +16,10 @@ function ensure_shared_links_exists
     then
         printf >&2 "\nYou can create a function to handle shared link creation and add it using add_hook \"create_shared_links\" \"your_function_name\"\n"
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "ensure_shared_links_exists"
 
@@ -38,11 +38,11 @@ function verify_shared_links
         then
             ! ${safe_check} && error "Server $hostname: Shared item $shared_directory/$item does not exists."
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "verify_shared_links"
 
@@ -67,7 +67,7 @@ function link_shared_to_release
             mkdir --parents "$new_release_directory/$current_item_parent_dir" || {
                 error "Server $hostname: Unable to create parent directory $new_release_directory/$current_item_parent_dir of shared item $item"
 
-                return "1"
+                return 1
             }
         fi
 
@@ -76,7 +76,7 @@ function link_shared_to_release
             rm --recursive --preserve-root --force "$new_release_directory/$item" || {
                 error "Server $hostname: Unable to remove shared item $item from release directory $new_release_directory"
 
-                return "1"
+                return 1
             }
         fi
 
@@ -84,11 +84,11 @@ function link_shared_to_release
         ln --symbolic "$(realpath --relative-to="$new_release_directory/$current_item_parent_dir" "$shared_directory/$item")" "$link_name" || {
             error "Server $hostname: Unable to create link between shared item $item and release directory $new_release_directory"
 
-            return "1"
+            return 1
         }
     done
 
-    return "0"
+    return 0
 }
 readonly -f "link_shared_to_release"
 
@@ -102,7 +102,9 @@ function activate_release
     ln --no-dereference --force --symbolic "$directory_to_sub_release" "$directory_to_current" || {
         error "Server $hostname: Unable to activate the release"
 
-        return "1"
+        return 1
     }
+
+    return 0
 }
 readonly -f "activate_release"

@@ -2,7 +2,7 @@
 
 function parse_release_command_line
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     declare -n option_archive_file="$1"
     declare -n option_deploy_path="$2"
     declare -n option_current_path="$3"
@@ -52,46 +52,46 @@ function parse_release_command_line
                 DEBUG=true
                 ;;
             --deploy=*)
-                command_line_parse_single_option "option --deploy" "option_deploy_path" "$option_deploy_path" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --deploy" "option_deploy_path" "$option_deploy_path" "${1#*=}" || return $?
                 ;;
             -d|--deploy)
-                command_line_parse_single_option "option --deploy" "option_deploy_path" "$option_deploy_path" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --deploy" "option_deploy_path" "$option_deploy_path" "${2:-}" || return $?
                 shift
                 ;;
             --current=*)
-                command_line_parse_single_option "option --current" "option_current_path" "$option_current_path" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --current" "option_current_path" "$option_current_path" "${1#*=}" || return $?
                 ;;
             -c|--current)
-                command_line_parse_single_option "option --current" "option_current_path" "$option_current_path" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --current" "option_current_path" "$option_current_path" "${2:-}" || return $?
                 shift
                 ;;
             --releases=*)
-                command_line_parse_single_option "option --releases" "option_releases_path" "$option_releases_path" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --releases" "option_releases_path" "$option_releases_path" "${1#*=}" || return $?
                 ;;
             -r|--releases)
-                command_line_parse_single_option "option --releases" "option_releases_path" "$option_releases_path" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --releases" "option_releases_path" "$option_releases_path" "${2:-}" || return $?
                 shift
                 ;;
             --shared=*)
-                command_line_parse_single_option "option --shared" "option_shared_path" "$option_shared_path" "${1#*=}" || return "$?"
+                command_line_parse_single_option "option --shared" "option_shared_path" "$option_shared_path" "${1#*=}" || return $?
                 ;;
             -s|--shared)
-                command_line_parse_single_option "option --shared" "option_shared_path" "$option_shared_path" "${2:-}" || return "$?"
+                command_line_parse_single_option "option --shared" "option_shared_path" "$option_shared_path" "${2:-}" || return $?
                 shift
                 ;;
             -*)
                 error "Unknown option $1"
 
-                return "1"
+                return 1
                 ;;
             *)
                 current_argument_number="$((current_argument_number + 1))"
                 case "$current_argument_number" in
                     1)
-                        command_line_parse_single_option "argument <stage-config-file>" "option_config_file" "$option_config_file" "$1" || return "$?"
+                        command_line_parse_single_option "argument <stage-config-file>" "option_config_file" "$option_config_file" "$1" || return $?
                         ;;
                     2)
-                        command_line_parse_single_option "argument <archive-file>" "option_archive_file" "$option_archive_file" "$1" || return "$?"
+                        command_line_parse_single_option "argument <archive-file>" "option_archive_file" "$option_archive_file" "$1" || return $?
                         ;;
                     *)
                         option_filter_server+=("$1")
@@ -104,24 +104,24 @@ function parse_release_command_line
 
     # this is - obviously - the only variable that can not be set in the config file
     [[ -z "$option_config_file" ]] && resolve_option_with_env "option_config_file" "DEPLOY_CONFIG_FILE"
-    release_option_load_config_file "$option_config_file" || return "$?"
+    release_option_load_config_file "$option_config_file" || return $?
     ${VERBOSE} || resolve_option_with_env "VERBOSE" "DEPLOY_VERBOSE"
     ${VERY_VERBOSE} || resolve_option_with_env "VERY_VERBOSE" "DEPLOY_VERY_VERBOSE"
     ${DEBUG} || resolve_option_with_env "DEBUG" "DEPLOY_DEBUG"
 
     [[ -z "$option_archive_file" ]] && resolve_option_with_env "option_archive_file" "DEPLOY_ARCHIVE_FILE"
-    release_option_validate_archive_file "option_archive_file" || return "$?"
+    release_option_validate_archive_file "option_archive_file" || return $?
 
     [[ -z "$option_deploy_path" ]] && resolve_option_with_env "option_deploy_path" "DEPLOY_PATH"
     [[ -z "$option_current_path" ]] && resolve_option_with_env "option_current_path" "DEPLOY_CURRENT_PATH"
     [[ -z "$option_releases_path" ]] && resolve_option_with_env "option_releases_path" "DEPLOY_RELEASES_PATH"
     [[ -z "$option_shared_path" ]] && resolve_option_with_env "option_shared_path" "DEPLOY_SHARED_PATH"
-    release_option_validate_paths "$option_deploy_path" "option_current_path" "option_releases_path" "option_shared_path" || return "$?"
+    release_option_validate_paths "$option_deploy_path" "option_current_path" "option_releases_path" "option_shared_path" || return $?
 
-    release_option_validate_servers "${option_filter_server[@]}" || return "$?"
-    release_option_validate_shared_items || return "$?"
-    release_option_validate_release_number || return "$?"
-    release_option_validate_connect_option || return "$?"
+    release_option_validate_servers "${option_filter_server[@]}" || return $?
+    release_option_validate_shared_items || return $?
+    release_option_validate_release_number || return $?
+    release_option_validate_connect_option || return $?
 
     if ${DEBUG}
     then
@@ -151,7 +151,7 @@ Resolved inputs
 "
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "parse_release_command_line"
 
@@ -162,27 +162,27 @@ function release_option_load_config_file
     if [[ -z "$file" ]]
     then
         error "Missing required argument <config-file>"
-        return "1"
+        return 1
     fi
 
     if ! [[ -f "$file" ]]
     then
         error "argument <config-file>: file \"$file\" not found."
 
-        return "1"
+        return 1
     fi
 
     source "$file" || {
         error "argument <config-file>: Something went wrong while reading file \"$file\"."
 
-        return "1"
+        return 1
     }
     # In case config file has unset those variables
     [[ -v VERBOSE ]] || VERBOSE=false
     [[ -v VERY_VERBOSE ]] || VERY_VERBOSE=false
     [[ -v DEBUG ]] || DEBUG=false
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_load_config_file"
 
@@ -193,7 +193,7 @@ function release_option_validate_archive_file
     if [[ -z "$file" ]]
     then
         error "Missing required argument <archive-file>"
-        return "1"
+        return 1
     fi
 
     file="$(realpath "$file")"
@@ -201,10 +201,10 @@ function release_option_validate_archive_file
     then
         error "argument <archive-file>: file \"$file\" not found."
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_archive_file"
 
@@ -221,24 +221,24 @@ function release_option_validate_paths
         then
             error "Can not specify both the global --deploy path and a specific path (--current, --releases or --shared)"
 
-            return "1"
+            return 1
         fi
 
         current="$deploy_path/current"
         releases="$deploy_path/releases"
         shared="$deploy_path/shared"
 
-        return "0"
+        return 0
     fi
 
     if [[ -z "$current" ]] || [[ -z "$releases" ]] || [[ -z "$shared" ]]
     then
         error "Unable to guess on which folders to deploy to."
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_paths"
 
@@ -256,7 +256,7 @@ function release_option_validate_servers
   declare -Ag DEPLOY_SERVER_LIST=([\"server 1\"]=\"user@server1\" [\"server 2\"]=\"user@server2\")
 "
 
-        return "1"
+        return 1
     fi
 
     for filtered_server_index in "$@"
@@ -269,7 +269,7 @@ function release_option_validate_servers
         then
             error "Server name \"$filtered_server_index\" does not exists in DEPLOY_SERVER_LIST"
 
-            return "1"
+            return 1
         fi
         filtered_server_list["$filtered_server_index"]="${DEPLOY_SERVER_LIST[$filtered_server_index]}"
     done
@@ -288,7 +288,7 @@ function release_option_validate_servers
         done
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_servers"
 
@@ -298,17 +298,17 @@ function release_option_validate_shared_items
     then
         declare -Ag DEPLOY_SHARED_ITEMS=()
 
-        return "0"
+        return 0
     fi
 
     if ! declare -p DEPLOY_SHARED_ITEMS 2>/dev/null | grep -q "^declare \-[aA]"
     then
         error "DEPLOY_SHARED_ITEMS must be an array."
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_shared_items"
 
@@ -323,10 +323,10 @@ function release_option_validate_release_number
         printf "DEPLOY_MAX_RELEASES must be a positive or null integer\nCurrently define as:\n"
         declare -p DEPLOY_MAX_RELEASES
 
-        return "1"
+        return 1
     fi
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_release_number"
 
@@ -341,10 +341,10 @@ function release_option_validate_connect_option
         then
             error "$option must be an array."
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "release_option_validate_connect_option"

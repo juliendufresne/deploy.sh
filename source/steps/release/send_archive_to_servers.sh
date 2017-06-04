@@ -8,10 +8,10 @@ function send_archive_to_servers
 
     ${VERBOSE} && action "Sending archive"
 
-    call_hook "pre_send_archive_to_servers" "$archive" "$releases_path"
-    push_file_to_servers "$archive" "$releases_path/$archive_filename" || return "$?"
+    call_hook "pre_send_archive_to_servers" "$archive" "$releases_path" || return $?
+    push_file_to_servers "$archive" "$releases_path/$archive_filename" || return $?
 
-    return "0"
+    return 0
 }
 
 readonly -f "send_archive_to_servers"

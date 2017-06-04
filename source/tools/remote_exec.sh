@@ -15,7 +15,7 @@ function remote_exec_ensure_var_exists
             DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
@@ -29,11 +29,11 @@ function remote_exec_ensure_var_exists
             DEPLOY_SSH_OPTIONS=()
             error "Something unexpected happened: $defined_variable_name should be defined and should be an array"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "remote_exec_ensure_var_exists"
 
@@ -44,7 +44,7 @@ function remote_exec_command_on_server_name
     declare -r command_name="$1"
     shift
 
-    remote_exec_ensure_var_exists || return "$?"
+    remote_exec_ensure_var_exists || return $?
     declare -a ssh_command_options=("-T")
     if [[ "${#DEPLOY_SSH_OPTIONS[@]}" -gt 0 ]]
     then
@@ -59,10 +59,10 @@ function remote_exec_command_on_server_name
         fi
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
 
-        ssh "${ssh_command_options[@]}" "$server" "$command_name" "$@" || return "$?"
+        ssh "${ssh_command_options[@]}" "$server" "$command_name" "$@" || return $?
     done
 
-    return "0"
+    return 0
 }
 readonly -f "remote_exec_command_on_server_name"
 
@@ -71,12 +71,12 @@ function remote_exec_function
     declare -r function_name="$1"
     shift
 
-    remote_exec_ensure_var_exists || return "$?"
+    remote_exec_ensure_var_exists || return $?
 
     if ! [[ -s "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]]
     then
         create_remote_script_file || {
-            return "1"
+            return 1
         }
     fi
 
@@ -94,10 +94,10 @@ function remote_exec_function
 #!/usr/bin/env bash
 source "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}"
 ${function_name} $@ || exit \"\$?\"
-'" || return "$?"
+'" || return $?
     done
 
-    return "0"
+    return 0
 }
 readonly -f "remote_exec_function"
 
@@ -152,9 +152,9 @@ EndOfScript
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
 
         DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]="$(ssh "${ssh_command_options[@]}" "$server" '/usr/bin/env bash -c "mktemp"')"
-        push_file_to_server "$server" "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}" "$deploy_ssh_server" || return "$?"
+        push_file_to_server "$server" "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}" "$deploy_ssh_server" || return $?
     done
 
-    return "0"
+    return 0
 }
 readonly -f "create_remote_script_file"

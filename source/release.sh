@@ -70,7 +70,7 @@ readonly -f "release_cleanup"
 
 function release
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
 
     trap release_cleanup INT TERM EXIT
     declare archive_file
@@ -89,15 +89,15 @@ function release
     link_release_with_shared_folder "$releases_path/$release_date" "$shared_path" && \
     activate_release "$current_path" "$releases_path/$release_date" && \
     clean_old_releases "$releases_path" "$current_path" || {
-        declare -r -i return_code="$?"
+        declare -r -i return_code=$?
 
         printf "\n"
         display_release_usage
         printf "\n"
 
-        return "$return_code"
+        return ${return_code}
     }
 
-    return "0"
+    return 0
 }
 readonly -f "release"

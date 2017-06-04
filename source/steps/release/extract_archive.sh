@@ -9,9 +9,9 @@ function extract_archive
 
     ${VERBOSE} && action "Extracting archive"
 
-    remote_exec_function "extract_archive" "$releases_path" "$archive_filename" "$release_date" || return "$?"
-    call_remote_hook "post_extract_archive" "$releases_path/$release_date" || return "$?"
+    remote_exec_function "extract_archive" "$releases_path" "$archive_filename" "$release_date" || return $?
+    call_remote_hook "post_extract_archive" "$releases_path/$release_date" || return $?
 
-    return "0"
+    return 0
 }
 readonly -f "extract_archive"

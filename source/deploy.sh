@@ -40,7 +40,7 @@ readonly -f "deploy_usage"
 
 function deploy
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     declare -r archive_dir="$(mktemp -d)"
     declare -a build_options=("--archive-dir" "$archive_dir")
     declare -a release_options=()
@@ -118,7 +118,7 @@ function deploy
             -*)
                 error "Unknown option $1"
 
-                return "1"
+                return 1
                 ;;
             *)
                 current_argument_number="$((current_argument_number + 1))"
@@ -156,7 +156,7 @@ function deploy
     ${VERBOSE} && section "Building revision"
 
     $0 build "${build_options[@]}" || {
-        declare -r -i return_code="$?"
+        declare -r -i return_code=$?
 
         printf "\n"
         deploy_usage
@@ -164,7 +164,7 @@ function deploy
 
         rm --recursive --preserve-root "$archive_dir"
 
-        return "$return_code"
+        return ${return_code}
     }
 
     ${VERBOSE} && section_done "revision build"
@@ -179,7 +179,7 @@ function deploy
     ${VERBOSE} && section "Releasing"
 
     $0 release "${release_options[@]}" || {
-        declare -r -i return_code="$?"
+        declare -r -i return_code=$?
 
         printf "\n"
         deploy_usage
@@ -187,13 +187,13 @@ function deploy
 
         rm --recursive --preserve-root "$archive_dir"
 
-        return "$return_code"
+        return ${return_code}
     }
 
     ${VERBOSE} && section_done "Release done"
 
     rm --recursive --preserve-root "$archive_dir"
 
-    return "0"
+    return 0
 }
 readonly -f "deploy"

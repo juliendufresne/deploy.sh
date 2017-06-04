@@ -11,19 +11,19 @@ function create_workspace_ensure_var_exists
             DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
-            return "1"
+            return 1
         fi
     done
 
-    return "0"
+    return 0
 }
 readonly -f "create_workspace_ensure_var_exists"
 
 function create_workspace
 {
-    do_not_run_twice || return "$?"
+    do_not_run_twice || return $?
     ${VERBOSE} && action "Creating workspace"
-    create_workspace_ensure_var_exists || return "$?"
+    create_workspace_ensure_var_exists || return $?
 
     declare -n workspace_dir="$1"
     declare -r revision="$2"
@@ -37,7 +37,7 @@ function create_workspace
     then
         error "Unable to create workspace $workspace_dir. Directory already exists."
 
-        return "1"
+        return 1
     fi
 
     declare -r output_file="$(mktemp)"
@@ -45,16 +45,16 @@ function create_workspace
     then
         error "Unable to create directory $workspace_dir."
 
-        printf >&2 'Following is the output of the command\n'
-        printf >&2 '######################################\n'
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
         cat "$output_file"
         rm "$output_file"
 
-        return "1"
+        return 1
     fi
 
     rm "$output_file"
 
-    return "0"
+    return 0
 }
 readonly -f "create_workspace"
