@@ -7,6 +7,8 @@ function activate_release
 
     ${VERBOSE} && action "Activating release"
     remote_exec_function "activate_release" "$current_path" "$release_path" || return $?
+    # we should not remove current release dir after it has been activated
+    DEPLOY_CURRENT_RELEASE_DIR=
 
     return 0
 

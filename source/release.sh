@@ -5,6 +5,7 @@
 
 declare -r -g DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL="$(mktemp)"
 declare -A -g DEPLOY_REMOTE_SCRIPT_FILES=()
+declare -g DEPLOY_CURRENT_RELEASE_DIR=
 
 function display_release_help
 {
@@ -43,13 +44,16 @@ function display_release_usage
 }
 readonly -f "display_release_usage"
 
-function release_cleanup
+function cleanup_local_script
 {
-    # we don't want to stop execution on failure here because we clean up everything.
-    set +e
-
     [[ -f "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]] && rm "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL"
 
+    return 0
+}
+readonly -f "cleanup_local_script"
+
+function cleanup_remote_scripts
+{
     declare -r output_file="$(mktemp)"
     # clean script file on remotes
     # each server store the script file on its own path (different from each other)
@@ -65,6 +69,32 @@ function release_cleanup
     fi
 
     rm "$output_file"
+
+    return 0
+}
+readonly -f "cleanup_remote_scripts"
+
+function cleanup_deployed_release
+{
+    if [[ -z "$DEPLOY_CURRENT_RELEASE_DIR" ]]
+    then
+        return 0
+    fi
+
+    remote_exec_function "remove_currently_deployed_release" "$DEPLOY_CURRENT_RELEASE_DIR"
+
+    return 0
+}
+readonly -f "cleanup_deployed_release"
+
+function release_cleanup
+{
+    # we don't want to stop execution on failure here because we clean up everything.
+    set +e
+
+    cleanup_local_script
+    cleanup_remote_scripts
+    cleanup_deployed_release
 }
 readonly -f "release_cleanup"
 

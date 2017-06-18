@@ -59,3 +59,24 @@ function clean_oldest_releases
 
     return ${return_code}
 }
+
+function remove_currently_deployed_release
+{
+    declare -r server_index=$1
+    declare -r current_release_path=$2
+    declare -i return_code=0
+    declare hostname
+    get_hostname "hostname"
+
+    if [[ -z "$current_release_path" ]] || ! [[ -d "$current_release_path" ]]
+    then
+        return 0
+    fi
+
+    rm --recursive --preserve-root "$current_release_path" || {
+        return_code=$?
+        error "Server $hostname: Unable to remove release $directory."
+    }
+
+    return ${return_code}
+}
