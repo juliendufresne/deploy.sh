@@ -66,7 +66,7 @@ function build
     refresh_local_repository "$repository_path" "$repository_url" && \
     create_workspace "workspace" "$revision" && \
     extract_git_content "$repository_path" "$workspace" "$revision" && \
-    generate_revision_file "$workspace" "$revision" && \
+    generate_revision_file "$workspace" "$revision" "$repository_path" && \
     call_hook "build" "$workspace" "$revision" && \
     create_archive "$workspace" "$archive_dir" || {
         declare -r -i return_code=$?

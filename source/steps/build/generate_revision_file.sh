@@ -27,22 +27,25 @@ function generate_revision_file
 
     declare -r workspace="$1"
     declare -r revision="$2"
+    declare -r repository_path="$3"
     declare -r file="$workspace/.REVISION"
     declare -r output_file="$(mktemp)"
+    declare -i return_code=0
 
-    printf "%s\n" "$revision" > "$file" 2>"$output_file" || {
+    cd "$repository_path"
+    git --no-pager show --quiet "$revision" > "$file" 2>"$output_file" || {
+        return_code=1
         error "Unable to create revision file $file."
 
         >&2 printf 'Following is the output of the command\n'
         >&2 printf '######################################\n'
         cat "$output_file"
-        rm "$output_file"
-
-        return 1
     }
-    rm "$output_file"
 
-    return 0
+    rm "$output_file"
+    cd "$OLDPWD"
+
+    return ${return_code}
 }
 
 readonly -f "generate_revision_file"
