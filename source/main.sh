@@ -29,7 +29,6 @@ include "steps/build/create_workspace.sh"
 include "steps/build/extract_git_content.sh"
 include "steps/build/generate_revision_file.sh"
 include "steps/build/parse_build_command_line.sh"
-include "steps/build/refresh_local_repository.sh"
 
 # includes every steps for delete command here
 include "steps/delete/parse_delete_command_line.sh"

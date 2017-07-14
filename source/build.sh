@@ -63,7 +63,6 @@ function build
     declare workspace
 
     parse_build_command_line "revision" "archive_dir" "repository_path" "repository_url" "$@" && \
-    refresh_local_repository "$repository_path" "$repository_url" && \
     create_workspace "workspace" "$revision" && \
     extract_git_content "$repository_path" "$workspace" "$revision" && \
     generate_revision_file "$workspace" "$revision" "$repository_path" && \

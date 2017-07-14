@@ -103,7 +103,7 @@ function parse_build_command_line
 
     # finally, check that variable are good
 
-    build_option_resolve_git_repository "$option_repository_path" "option_repository_url" || return $?
+    build_option_resolve_git_repository "$option_repository_path" "$option_repository_url" || return $?
     build_option_resolve_revision "$option_repository_path" "$option_repository_url" "option_revision" || return $?
     build_option_resolve_archive_dir "option_archive_dir" || return $?
 
@@ -159,7 +159,7 @@ readonly -f "build_option_load_config_file"
 function build_option_resolve_git_repository
 {
     declare -r option_repository_path="$1"
-    declare -n _ref_option_repository_url="$2"
+    declare -r option_repository_url="$2"
 
     if [[ -z "$option_repository_path" ]]
     then
@@ -173,32 +173,35 @@ There are multiple ways to define it:
   - define the variable DEPLOY_REPOSITORY_PATH in your config file
 "
 
-        printf >&2 "\nNote: This option will also be used if the path correspond to a git server (initialised with --bare or --mirror).\n"
+        return 1
+    fi
+
+    # path exists but does not correspond to a mirrored repository
+    if [[ -e "$option_repository_path" ]] && ! [[ "true" = "$(git --git-dir "$option_repository_path" rev-parse --is-bare-repository 2>/dev/null)" ]]
+    then
+        error "Repository path exists but is not a mirrored repository."
+
+        printf >&2 "You should probably remove the directory $option_repository_path or define another path.\n"
 
         return 1
     fi
 
-    if [[ -z "$_ref_option_repository_url" ]]
+    if [[ -z "$option_repository_url" ]]
     then
-        if [[ "true" = "$(git --git-dir "$option_repository_path" rev-parse --is-bare-repository 2>/dev/null)" ]]
-        then
-            _ref_option_repository_url="$option_repository_path"
-        else
-            error "You must define the remote git repository." \
-                  "This option defines the remote repository to use to clone/refresh the local repository."
+        error "You must define the remote git repository." \
+              "This option defines the remote repository to use to clone/refresh the local repository."
 
-            printf >&2 "
+        printf >&2 "
 There are multiple ways to define it:
-  - command line option ($0 deploy build --repository-url REPOSITORY_URL)
-  - define the variable before running the command (DEPLOY_REPOSITORY_URL=\"git_url\" $0 deploy build)
-  - export the variable once. It will be available for every deploy command (export DEPLOY_REPOSITORY_URL=\"git_url\")
-  - define the variable DEPLOY_REPOSITORY_URL in your config file
+- command line option ($0 deploy build --repository-url REPOSITORY_URL)
+- define the variable before running the command (DEPLOY_REPOSITORY_URL=\"git_url\" $0 deploy build)
+- export the variable once. It will be available for every deploy command (export DEPLOY_REPOSITORY_URL=\"git_url\")
+- define the variable DEPLOY_REPOSITORY_URL in your config file
 "
 
-            printf >&2 "\nNote: You can also use a local bare repository. In this case, create it and specify its path in the --repository-path option."
+        printf >&2 "\nNote: You can also use a local bare repository. In this case, create it and specify its path in the --repository-path option."
 
-            return 1
-        fi
+        return 1
     fi
 
     return 0
@@ -218,36 +221,14 @@ function build_option_resolve_revision
         return 1
     fi
 
-    # special case: the local repository is a bare repository so we trust its content
-    if [[ "$option_repository_path" = "$option_repository_url" ]]
+    refresh_local_repository "$option_repository_path" "$option_repository_url" || return 1
+    if ! git --git-dir "$option_repository_path" rev-list --max-count 1 "$_option_revision" &>/dev/null
     then
-        if ! git --git-dir "$option_repository_path" show-ref "$_option_revision" &>/dev/null
-        then
-            error "<revision>: The revision $_option_revision does not correspond to any commit, branch or tag in the repository."
-
-            return 1
-        fi
-
-        _option_revision="$(git --git-dir "$option_repository_path" show-ref "$_option_revision" | head -n "1" | awk '{ print $1 }')"
-
-        return 0
-    fi
-
-    if ! git ls-remote --exit-code --refs "$option_repository_url" "$_option_revision" &>/dev/null
-    then
-
-        # it may be caused by an unreachable git remote repository
-        if ! git ls-remote --exit-code -h "$option_repository_url" &>/dev/null
-        then
-            error "The repository $option_repository_url is unreachable."
-        else
-            error "<revision>: The revision $_option_revision does not correspond to any commit, branch or tag in the repository."
-        fi
+        error "<revision>: The revision $_option_revision does not correspond to any commit, branch or tag in the repository."
 
         return 1
     fi
-
-    _option_revision="$(git ls-remote --exit-code --refs "$option_repository_url" "$_option_revision" | head -n "1" | awk '{ print $1 }')"
+    _option_revision="$(git --git-dir "$option_repository_path" rev-list --max-count 1 "$_option_revision")"
 
     return 0
 }
@@ -265,3 +246,47 @@ function build_option_resolve_archive_dir
     return 0
 }
 readonly -f "build_option_resolve_archive_dir"
+
+function refresh_local_repository
+{
+    do_not_run_twice || return $?
+    ${VERBOSE} && display_title 1 "Refreshing local repository"
+
+    declare -r repository_path="$1"
+    declare -r repository_url="$2"
+
+    ${VERY_VERBOSE} && printf "    repository: \e[32m$repository_path\e[39;49m\n"
+
+    declare -r output_file="$(mktemp)"
+    if ! [[ -d "$repository_path" ]]
+    then
+        ${VERY_VERBOSE} && display_title 2 "fresh clone"
+        git clone --quiet --mirror "$repository_url" "$repository_path" &>"$output_file" || {
+            error "Unable to clone from remote repository $repository_url"
+
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
+            >&2 cat "$output_file"
+            rm "$output_file"
+
+            return 1
+        }
+    fi
+
+    ${VERY_VERBOSE} && display_title 2 "remote update"
+    git --git-dir="$repository_path" remote update &>"$output_file" || {
+        error "Unable to refresh git repository from remote $repository_url"
+
+        >&2 printf 'Following is the output of the command\n'
+        >&2 printf '######################################\n'
+        >&2 cat "$output_file"
+        rm "$output_file"
+
+        return 1
+    }
+
+    rm "$output_file"
+
+    return 0
+}
+readonly -f "refresh_local_repository"
