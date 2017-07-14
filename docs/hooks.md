@@ -13,7 +13,7 @@ To attach a hook at a specific step, you only need to:
 
 ```bash
 # my_build_config.sh
-function main()
+function load_config()
 {
     add_hook "build" "do_build"
 }
@@ -23,7 +23,7 @@ function do_build()
     echo "I am showing this message during the build step"
 }
 
-main
+load_config
 ```
 
 In order to use it, simply run the `build` command like this:  
@@ -66,12 +66,23 @@ hook signature: `post_extract_archive $server_index $current_release_path`
 
 Called after the archive is extracted to each remote servers
 
-> *Note:* The `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1` and the second `2`
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
 
 **post_link_release_with_shared_folder**
 
 hook signature: `post_link_release_with_shared_folder $server_index $current_release_path $shared_path`
 
-Called when the shared folder is linked with this release. Use it when you want to create some files or need some files from the shared path.
+Called when the shared folder is linked with this release. Use it when you want to create some files or need some files from the shared path.  
+You can also use this hook to perform some action right before the revision is activated.
 
-> *Note:* The `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1` and the second `2`
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
+
+**post_activate_release**
+
+hook signature: `post_activate_release $server_index $current_path $current_release_path`
+
+Called right after the released revision is live.  
+
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
+
+> *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.

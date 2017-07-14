@@ -11,6 +11,7 @@ function init_custom_hooks
         CUSTOM_HOOKS["pre_send_archive_to_servers"]=""
         CUSTOM_HOOKS["post_extract_archive"]=""
         CUSTOM_HOOKS["post_link_release_with_shared_folder"]=""
+        CUSTOM_HOOKS["post_activate_release"]=""
     fi
 
     return 0
@@ -81,7 +82,9 @@ readonly -f "call_hook"
 function call_remote_hook
 {
     declare -r hook_name="$1"
+    declare -r fail_on_first_error="$2"
     declare -i return_code=0
+    shift
     shift
 
     init_custom_hooks || return $?
@@ -100,11 +103,14 @@ function call_remote_hook
             return_code=$?
             error "hook $hook_name: Something went wrong while calling function named $user_defined_function_name"
 
-            return ${return_code}
+            if ${fail_on_first_error}
+            then
+                return ${return_code}
+            fi
         }
     done
 
-    return 0
+    return ${return_code}
 }
 readonly -f "call_remote_hook"
 
