@@ -101,6 +101,17 @@ function parse_build_command_line
     ${VERY_VERBOSE} || resolve_option_with_env "VERY_VERBOSE" "DEPLOY_VERY_VERBOSE"
     ${DEBUG} || resolve_option_with_env "DEBUG" "DEPLOY_DEBUG"
 
+    # ensure verbosity level is consistent
+    if ${DEBUG}
+    then
+        VERY_VERBOSE=true
+        VERBOSE=true
+    fi
+    if ${VERY_VERBOSE}
+    then
+        VERBOSE=true
+    fi
+
     # finally, check that variable are good
 
     build_option_resolve_git_repository "$option_repository_path" "$option_repository_url" || return $?

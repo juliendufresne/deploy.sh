@@ -109,6 +109,17 @@ function parse_release_command_line
     ${VERY_VERBOSE} || resolve_option_with_env "VERY_VERBOSE" "DEPLOY_VERY_VERBOSE"
     ${DEBUG} || resolve_option_with_env "DEBUG" "DEPLOY_DEBUG"
 
+    # ensure verbosity level is consistent
+    if ${DEBUG}
+    then
+        VERY_VERBOSE=true
+        VERBOSE=true
+    fi
+    if ${VERY_VERBOSE}
+    then
+        VERBOSE=true
+    fi
+
     [[ -z "$option_archive_file" ]] && resolve_option_with_env "option_archive_file" "DEPLOY_ARCHIVE_FILE"
     release_option_validate_archive_file "option_archive_file" || return $?
 
