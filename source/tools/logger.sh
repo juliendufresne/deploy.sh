@@ -190,7 +190,11 @@ function block
     do
         params+=("$message")
     done
-    params+=("occurred on ${BASH_SOURCE[1]}:${BASH_LINENO[1]}")
+
+    if [[ -v DEBUG ]] && ${DEBUG}
+    then
+        params+=("occurred on ${BASH_SOURCE[1]}:${BASH_LINENO[1]}")
+    fi
 
     for message in "${params[@]}"
     do
