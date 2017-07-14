@@ -34,7 +34,7 @@ deploy build [options] <revision>
 5. Call a user defined hook name "build". This is where you can add some specific action to do during the build step.
 6. Archive the workspace in a tar.bz2 file.
 
-> Use the `--help` option for more details about this command.
+> For more details about this command, use the `--help` option or visit the [build documentation](docs/build.md)
 
 ## The release command
 

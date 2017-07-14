@@ -117,8 +117,7 @@ function release
     send_archive_to_servers "$releases_path" "$archive_file" && \
     extract_archive "$releases_path" "$archive_file" "$release_date" && \
     link_release_with_shared_folder "$releases_path/$release_date" "$shared_path" && \
-    activate_release "$current_path" "$releases_path/$release_date" && \
-    clean_old_releases "$releases_path" "$current_path" || {
+    activate_release "$current_path" "$releases_path/$release_date" || {
         declare -r -i return_code=$?
 
         if ! [[ -v DEPLOY_SHOW_USAGE_ON_ERROR ]]
@@ -135,6 +134,10 @@ function release
 
         return ${return_code}
     }
+
+    # if there is an error while cleaning, we still want to continue the execution of the script
+    clean_old_releases "$releases_path" "$current_path"
+    finish_release "$archive_file"
 
     return 0
 }

@@ -86,3 +86,14 @@ Called right after the released revision is live.
 > *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
 
 > *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.
+
+**post_release**
+
+hook signature: `post_release $server_index $revision_file`
+
+Called right before the release command ends.  
+`$revision_file` is a path to a copy of the .REVISION file.
+
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
+
+> *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.

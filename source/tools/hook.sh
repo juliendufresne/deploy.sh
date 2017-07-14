@@ -12,6 +12,7 @@ function init_custom_hooks
         CUSTOM_HOOKS["post_extract_archive"]=""
         CUSTOM_HOOKS["post_link_release_with_shared_folder"]=""
         CUSTOM_HOOKS["post_activate_release"]=""
+        CUSTOM_HOOKS["post_release"]=""
     fi
 
     return 0

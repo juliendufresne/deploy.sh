@@ -11,6 +11,5 @@ function clean_old_releases
     remote_exec_function "clean_oldest_releases" "$DEPLOY_MAX_RELEASES" "$releases_path" "$current_path" || return $?
 
     return 0
-
 }
 readonly -f "clean_old_releases"
