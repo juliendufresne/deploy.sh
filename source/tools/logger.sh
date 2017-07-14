@@ -13,6 +13,12 @@ function _get_log_file
         DEPLOY_LOG_FILE="$(dirname "$(mktemp --dry-run -t tmp.XXXXXXXXXX)")/deploy.log"
     fi
 
+    if ! [[ -e "$DEPLOY_LOG_FILE" ]]
+    then
+        # errors on log file creation should not stop the execution
+        touch "$DEPLOY_LOG_FILE" || true
+    fi
+
     _log_file=""
     if [[ -w "$DEPLOY_LOG_FILE" ]]
     then
