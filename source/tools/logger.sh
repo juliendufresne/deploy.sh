@@ -147,7 +147,7 @@ function display_title
 
     # display (level * 2) spaces
     printf ' %.0s' `seq 1 $((level * 2))`
-    printf '%s %b\n' "${symbol}" "$name"
+    printf '\e[35m%s\e[34m %b\e[0m\n' "${symbol}" "$name"
 }
 
 # deprecated. Use `display_title <level> <title_name> instead`
