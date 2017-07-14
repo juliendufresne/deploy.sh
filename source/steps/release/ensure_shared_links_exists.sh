@@ -25,7 +25,7 @@ function ensure_shared_links_exists
 
     declare -r shared_path="$1"
 
-    ${VERBOSE} && action "Ensuring shared links exists on servers"
+    ${VERBOSE} && display_title 1 "Ensuring shared links exists on servers"
     remote_exec_function "ensure_shared_links_exists" "$shared_path" "${DEPLOY_SHARED_ITEMS[@]}" || return $?
 
     return 0

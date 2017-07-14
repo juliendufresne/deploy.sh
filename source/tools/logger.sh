@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 function _get_log_file
 {
@@ -131,25 +132,40 @@ function section_done
     printf ' %b%*.*s%b\n' "$color" '0' "$((terminal_length - 1))" "$pad" "$reset"
 }
 
+function display_title
+{
+    # level should be one-based (starting from 1). Level 0 is considered a section
+    declare -ri level="$1"
+    declare -r name="$2"
+    declare -r symbols=" >+-*ø§"
+    declare symbol="§"
+
+    if [[ "${level}" -lt "${#symbols}" ]]
+    then
+        symbol=${symbols:${level}:1}
+    fi
+
+    # display (level * 2) spaces
+    printf ' %.0s' `seq 1 $((level * 2))`
+    printf '%s %b\n' "${symbol}" "$name"
+}
+
+# deprecated. Use `display_title <level> <title_name> instead`
 function action
 {
-    declare -r name="$1"
-
-    printf '  + %b\n' "$name"
+    display_title 1 "$1"
 }
 
+# deprecated. Use `display_title <level> <title_name> instead`
 function sub_action
 {
-    declare -r name="$1"
-
-    printf '    > %b\n' "$name"
+    display_title 2 "$1"
 }
 
+# deprecated. Use `display_title <level> <title_name> instead`
 function action_level_3
 {
-    declare -r name="$1"
-
-    printf '      * %b\n' "$name"
+    display_title 3 "$1"
 }
 
 function warning

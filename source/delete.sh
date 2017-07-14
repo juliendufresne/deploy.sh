@@ -44,7 +44,7 @@ function delete
 
     parse_delete_command_line "deploy_path" "current_path" "releases_path" "shared_path" "$@" && \
     ssh_test_connection && \
-    action "Deleting application on servers" && \
+    display_title 1 "Deleting application on servers" && \
     remote_exec_function "delete_application" "$deploy_path" "$current_path" "$releases_path" "$shared_path" || {
         declare -r -i return_code=$?
 

@@ -22,7 +22,7 @@ readonly -f "create_workspace_ensure_var_exists"
 function create_workspace
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && action "Creating workspace"
+    ${VERBOSE} && display_title 1 "Creating workspace"
     create_workspace_ensure_var_exists || return $?
 
     declare -n workspace_dir="$1"

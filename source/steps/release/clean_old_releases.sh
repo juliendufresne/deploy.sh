@@ -7,7 +7,7 @@ function clean_old_releases
     declare -r releases_path="$1"
     declare -r current_path="$2"
 
-    ${VERBOSE} && action "Clean old releases"
+    ${VERBOSE} && display_title 1 "Clean old releases"
     remote_exec_function "clean_oldest_releases" "$DEPLOY_MAX_RELEASES" "$releases_path" "$current_path" || return $?
 
     return 0

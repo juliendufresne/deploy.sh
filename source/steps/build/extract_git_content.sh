@@ -22,7 +22,7 @@ readonly -f "extract_git_content_ensure_var_exists"
 function extract_git_content
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && action "Retrieving git archive"
+    ${VERBOSE} && display_title 1 "Retrieving git archive"
     extract_git_content_ensure_var_exists || return $?
 
     declare -r repository_path="$1"

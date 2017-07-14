@@ -22,7 +22,7 @@ readonly -f "create_archive_ensure_var_exists"
 function create_archive
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && action "Creating archive"
+    ${VERBOSE} && display_title 1 "Creating archive"
     create_archive_ensure_var_exists || return $?
 
     declare -r workspace="$1"

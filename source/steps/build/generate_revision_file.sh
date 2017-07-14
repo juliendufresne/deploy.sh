@@ -22,7 +22,7 @@ readonly -f "generate_revision_file_ensure_var_exists"
 function generate_revision_file
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && action "Generating .REVISION file"
+    ${VERBOSE} && display_title 1 "Generating .REVISION file"
     generate_revision_file_ensure_var_exists || return $?
 
     declare -r workspace="$1"

@@ -36,7 +36,7 @@ readonly -f "ssh_test_connection_ensure_var_exists"
 function ssh_test_connection
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && action "Testing remote server connectivity"
+    ${VERBOSE} && display_title 1 "Testing remote server connectivity"
     ssh_test_connection_ensure_var_exists || return $?
 
     declare output_file="$(mktemp)"
@@ -53,7 +53,7 @@ function ssh_test_connection
         declare regex='^[0-9]+$'
         [[ "$server_name" =~ $regex ]] && server_name="#$server_name"
 
-        ${VERY_VERBOSE} && sub_action "server \e[32m$server_name\e[39;49m"
+        ${VERY_VERBOSE} && display_title 2 "server \e[32m$server_name\e[39;49m"
 
         if ! ssh "${ssh_command_options[@]}" "$server" exit &>"$output_file"
         then
