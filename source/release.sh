@@ -121,9 +121,17 @@ function release
     clean_old_releases "$releases_path" "$current_path" || {
         declare -r -i return_code=$?
 
-        printf "\n"
-        display_release_usage
-        printf "\n"
+        if ! [[ -v DEPLOY_SHOW_USAGE_ON_ERROR ]]
+        then
+            DEPLOY_SHOW_USAGE_ON_ERROR=true
+        fi
+
+        if ${DEPLOY_SHOW_USAGE_ON_ERROR}
+        then
+            printf "\n"
+            display_release_usage
+            printf "\n"
+        fi
 
         return ${return_code}
     }

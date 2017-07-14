@@ -117,6 +117,7 @@ function deploy
                 ;;
             -*)
                 error "Unknown option $1"
+                deploy_usage
 
                 return 1
                 ;;
@@ -155,7 +156,7 @@ function deploy
 
     ${VERBOSE} && section "Building revision"
 
-    $0 build "${build_options[@]}" || {
+    DEPLOY_SHOW_USAGE_ON_ERROR=false $0 build "${build_options[@]}" || {
         declare -r -i return_code=$?
 
         printf "\n"
@@ -178,7 +179,7 @@ function deploy
 
     ${VERBOSE} && section "Releasing"
 
-    $0 release "${release_options[@]}" || {
+    DEPLOY_SHOW_USAGE_ON_ERROR=false $0 release "${release_options[@]}" || {
         declare -r -i return_code=$?
 
         printf "\n"
