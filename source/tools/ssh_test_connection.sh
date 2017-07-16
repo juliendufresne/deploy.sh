@@ -39,7 +39,7 @@ function ssh_test_connection
     ${VERBOSE} && display_title 1 "Testing remote server connectivity"
     ssh_test_connection_ensure_var_exists || return $?
 
-    declare output_file="$(mktemp)"
+    declare output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     declare -a ssh_command_options=("-vvv" "-T")
     if [[ "${#DEPLOY_SSH_OPTIONS[@]}" -gt 0 ]]
     then

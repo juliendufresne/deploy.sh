@@ -34,15 +34,14 @@ function create_archive
     declare -r archive_file="$archive_dir/$directory_name.tar.bz2"
     ${VERY_VERBOSE} && printf "    archive: \e[32m$archive_file\e[39;49m\n"
 
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     if ! [[ -d "$archive_dir" ]]
     then
         mkdir --parents "$archive_dir" &>"$output_file" || {
             error "Something went wrong while creating the archive directory $archive_dir"
 
-            printf  >&2 'Following is the output of the command\n'
-            printf  >&2 '######################################\n'
-
+            >&2 printf 'Following is the output of the command\n'
+            >&2 printf '######################################\n'
             cat "$output_file"
             rm "$output_file"
 

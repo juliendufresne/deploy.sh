@@ -5,9 +5,9 @@
 
 declare -g DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL=""
 declare -A -g DEPLOY_REMOTE_SCRIPT_FILES=()
-declare -g DEPLOY_CURRENT_RELEASE_DIR=
+declare -g DEPLOY_CURRENT_rollback_DIR=
 
-function display_release_help
+function display_rollback_help
 {
     declare -r green="\e[32m"
     declare -r yellow="\e[33m"
@@ -15,36 +15,34 @@ function display_release_help
 
     printf "
 ${yellow}Usage:${reset_foreground}
-  release [options] <config-file> <archive-file> [<server-name> ...]
+  rollback [options] <config-file>
 
 ${yellow}Arguments:${reset_foreground}
   ${green}config-file${reset_foreground}    Configuration file for the stage
-  ${green}archive-file${reset_foreground}   Archive to deploy
-  ${green}server-name${reset_foreground}    Reduce the list of server define in the stage-config-file to the one listed. (${yellow}optional${reset_foreground})
 
 ${yellow}Options:${reset_foreground}
 Note: every options can be defined with environment variable with prefix DEPLOY_*
   ${green}-h, --help${reset_foreground}                    Display this help message
-  ${green}-d, --deploy PATH${reset_foreground}             Specify the global deploy path containing /current, /releases and /shared
+  ${green}-d, --deploy PATH${reset_foreground}             Specify the global deploy path containing /current, /rollbacks and /shared
   ${green}-c, --current CURRENT_PATH${reset_foreground}    Specify the path of the current published version (incompatible with --deploy)
   ${green}-r, --releases RELEASES_PATH${reset_foreground}  Specify where every releases are stored (incompatible with --deploy)
   ${green}-s, --shared SHARED_PATH${reset_foreground}      Specify where every persistent files and directories are stored (incompatible with --deploy)
   ${green}-v|vv|vvv, --verbose${reset_foreground}          Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 "
 }
-readonly -f "display_release_help"
+readonly -f "display_rollback_help"
 
-function display_release_usage
+function display_rollback_usage
 {
     declare -r green="\e[32m"
     declare -r yellow="\e[33m"
     declare -r reset_foreground="\e[39m"
 
-    printf "${green}release [-h|--help] [-v|vv|vvv|--verbose] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file> <archive-file> [<server-name> ...]${reset_foreground}\n"
+    printf "${green}rollback [-h|--help] [-v|vv|vvv|--verbose] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file>${reset_foreground}\n"
 }
-readonly -f "display_release_usage"
+readonly -f "display_rollback_usage"
 
-function cleanup_local_script
+function rollback_cleanup_local_script
 {
     if ! [[ -z "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]] && [[ -f "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]]
     then
@@ -54,9 +52,9 @@ function cleanup_local_script
 
     return 0
 }
-readonly -f "cleanup_local_script"
+readonly -f "rollback_cleanup_local_script"
 
-function cleanup_remote_scripts
+function rollback_cleanup_remote_scripts
 {
     declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     # clean script file on remotes
@@ -76,52 +74,35 @@ function cleanup_remote_scripts
 
     return 0
 }
-readonly -f "cleanup_remote_scripts"
+readonly -f "rollback_cleanup_remote_scripts"
 
-function cleanup_deployed_release
-{
-    if [[ -z "$DEPLOY_CURRENT_RELEASE_DIR" ]]
-    then
-        return 0
-    fi
-
-    remote_exec_function "remove_currently_deployed_release" "$DEPLOY_CURRENT_RELEASE_DIR"
-
-    return 0
-}
-readonly -f "cleanup_deployed_release"
-
-function release_cleanup
+function rollback_cleanup
 {
     # we don't want to stop execution on failure here because we clean up everything.
     set +e
 
-    cleanup_local_script
-    cleanup_remote_scripts
-    cleanup_deployed_release
+    rollback_cleanup_local_script
+    rollback_cleanup_remote_scripts
 }
-readonly -f "release_cleanup"
+readonly -f "rollback_cleanup"
 
-function release
+function rollback
 {
     do_not_run_twice || return $?
 
-    trap release_cleanup INT TERM EXIT
-    declare archive_file
+    trap rollback_cleanup INT TERM EXIT
     declare deploy_path
     declare current_path
     declare releases_path
     declare shared_path
-    declare -r release_date="$(date --utc "+%Y%m%d%H%M%S")"
+    declare rollback_to_release
 
-    parse_release_command_line "archive_file" "deploy_path" "current_path" "releases_path" "shared_path" "$@" && \
+    rollback_to_release=""
+
+    parse_rollback_command_line "deploy_path" "current_path" "releases_path" "shared_path" "$@" && \
     ssh_test_connection && \
-    ensure_directory_structure_exists "$current_path" "$releases_path" "$shared_path" && \
-    ensure_shared_links_exists "$shared_path" && \
-    send_archive_to_servers "$releases_path" "$archive_file" && \
-    extract_archive "$releases_path" "$archive_file" "$release_date" && \
-    link_release_with_shared_folder "$releases_path/$release_date" "$shared_path" && \
-    activate_release "$current_path" "$releases_path/$release_date" || {
+    find_previous_release "$releases_path" "rollback_to_release" && \
+    activate_previous_release "$current_path" "$releases_path/$rollback_to_release" "$shared_path" || {
         declare -r -i return_code=$?
 
         if ! [[ -v DEPLOY_SHOW_USAGE_ON_ERROR ]]
@@ -132,17 +113,16 @@ function release
         if ${DEPLOY_SHOW_USAGE_ON_ERROR}
         then
             printf "\n"
-            display_release_usage
+            display_rollback_usage
             printf "\n"
         fi
 
         return ${return_code}
     }
 
-    # if there is an error while cleaning, we still want to continue the execution of the script
-    clean_old_releases "$releases_path" "$current_path"
-    finish_release "$archive_file"
+    clean_last_release "$current_path" "$releases_path"
+    finish_rollback
 
     return 0
 }
-readonly -f "release"
+readonly -f "rollback"

@@ -9,7 +9,7 @@ function delete_application
     declare -r shared_root_path="$5"
     declare hostname
     get_hostname "hostname"
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
 
     # strategy: failure should not break anything. Ex: we shouldn't have a symbolic link pointing to a non-existent destination
 

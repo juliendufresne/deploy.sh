@@ -8,7 +8,7 @@ function extract_archive
     declare -r release_name="$4"
 
     declare -r archive_dir="$(basename --suffix=.tar.bz2 "$archive_filename")"
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
 
     declare hostname
     get_hostname "hostname"

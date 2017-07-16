@@ -6,7 +6,6 @@ function ensure_directory_structure_exists
     declare -r CURRENT_RELEASE_PATH="$2"
     declare -r RELEASES_ROOT_PATH="$3"
     declare -r SHARED_ROOT_PATH="$4"
-    declare -r output_file="$(mktemp)"
     declare hostname
     get_hostname "hostname"
 
@@ -17,11 +16,13 @@ function ensure_directory_structure_exists
         return 1
     fi
 
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     for directory in "$RELEASES_ROOT_PATH" "$SHARED_ROOT_PATH"
     do
         if [[ -e "$directory" ]] && ! [[ -d "$directory" ]]
         then
             error "Server $hostname: File $directory already exists and is not a directory."
+            rm "$output_file"
 
             return 1
         fi

@@ -97,3 +97,32 @@ Called right before the release command ends.
 > *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
 
 > *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.
+
+### During the rollback command
+
+**pre_activate_previous_release**
+
+hook signature: `pre_activate_previous_release $server_index $current_path $current_release_path $shared_path`
+
+Called before the previous release is activated
+
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
+
+**post_activate_previous_release**
+
+hook signature: `post_activate_previous_release $server_index $current_path $current_release_path $shared_path`
+
+Called right after the previous release revision is live.  
+
+> *Note:* `$server_index` allows you to run an action to one server only. Suppose you have to server, this first server will receive `1`, the second `2`, ...
+
+> *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.
+
+**post_rollback**
+
+hook signature: `post_rollback`
+
+Called right before the rollback command ends.  
+
+> *Note:* Since the release is activated, every failed hooks will not stop the execution but an error will be raised.
+

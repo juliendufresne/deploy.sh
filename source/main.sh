@@ -22,6 +22,7 @@ include "build.sh"
 include "delete.sh"
 include "deploy.sh"
 include "release.sh"
+include "rollback.sh"
 
 # includes every steps for build command here
 include "steps/build/create_archive.sh"
@@ -33,7 +34,7 @@ include "steps/build/parse_build_command_line.sh"
 # includes every steps for delete command here
 include "steps/delete/parse_delete_command_line.sh"
 
-# includes every steps for deploy command here
+# includes every steps for release command here
 include "steps/release/activate_release.sh"
 include "steps/release/clean_old_releases.sh"
 include "steps/release/ensure_directory_structure_exists.sh"
@@ -43,6 +44,14 @@ include "steps/release/finish_release.sh"
 include "steps/release/link_release_with_shared_folder.sh"
 include "steps/release/parse_release_command_line.sh"
 include "steps/release/send_archive_to_servers.sh"
+
+# includes every steps for rollback command here
+include "steps/rollback/activate_previous_release.sh"
+include "steps/rollback/clean_last_release.sh"
+include "steps/rollback/find_previous_release.sh"
+include "steps/rollback/finish_rollback.sh"
+include "steps/rollback/parse_rollback_command_line.sh"
+
 loader_finish
 
 
@@ -66,6 +75,7 @@ ${yellow}Available commands:${reset_foreground}
   ${green}deploy${reset_foreground}    Create a release
   ${green}delete${reset_foreground}    Delete everything on remote server
   ${green}release${reset_foreground}   Release a built revision
+  ${green}rollback${reset_foreground}  Rollback to previous released version
 "
 }
 readonly -f "display_main_help"
@@ -79,7 +89,7 @@ function main
     then
         case "$1" in
             # if the first argument correspond to a command name, we shift it in order to pass clean options to the appropriate command
-            "deploy"|"delete"|"build"|"release")
+            "deploy"|"delete"|"build"|"release"|"rollback")
                 command_name="$1"
                 shift
                 ;;
@@ -111,6 +121,9 @@ function main
             ;;
         "release")
             release "$@" || return $?
+            ;;
+        "rollback")
+            rollback "$@" || return $?
             ;;
         *)
             # should not be possible except if developer add a new command in the previous section and did not handle it here

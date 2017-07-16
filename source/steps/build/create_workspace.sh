@@ -28,7 +28,7 @@ function create_workspace
     declare -n workspace_dir="$1"
     declare -r revision="$2"
 
-    _WORKSPACE_DIR="$(mktemp --directory --dry-run)"
+    _WORKSPACE_DIR="$(mktemp --directory --dry-run -t deploy.XXXXXXXXXX)"
     workspace_dir="$_WORKSPACE_DIR/$revision"
 
     ${VERY_VERBOSE} && printf "    workspace: \e[32m$workspace_dir\e[39m\n"
@@ -40,7 +40,7 @@ function create_workspace
         return 1
     fi
 
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     if ! mkdir --parents "$workspace_dir" &>"$output_file"
     then
         error "Unable to create directory $workspace_dir."
