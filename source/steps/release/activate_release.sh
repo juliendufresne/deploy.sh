@@ -13,6 +13,5 @@ function activate_release
     call_remote_hook "post_activate_release" false "$current_path" "$release_path"
 
     return 0
-
 }
 readonly -f "activate_release"

@@ -251,7 +251,7 @@ function build_option_resolve_archive_dir
 
     if [[ -z "$_ref" ]]
     then
-        _ref="$(mktemp --directory --dry-run)"
+        _ref="$(mktemp --directory --dry-run -t deploy.XXXXXXXXXX)"
     fi
 
     return 0
@@ -268,7 +268,7 @@ function refresh_local_repository
 
     ${VERY_VERBOSE} && printf "    repository: \e[32m$repository_path\e[39;49m\n"
 
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     if ! [[ -d "$repository_path" ]]
     then
         ${VERY_VERBOSE} && display_title 2 "fresh clone"

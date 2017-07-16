@@ -69,7 +69,7 @@ function push_file_to_server
         rsync_options+=("${DEPLOY_RSYNC_OPTIONS[@]}")
     fi
 
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     rsync "${rsync_options[@]}" "$file" "$server:$destination" &>"$output_file" || {
         error "Unable to send file to server $server_name"
 

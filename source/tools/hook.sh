@@ -13,6 +13,9 @@ function init_custom_hooks
         CUSTOM_HOOKS["post_link_release_with_shared_folder"]=""
         CUSTOM_HOOKS["post_activate_release"]=""
         CUSTOM_HOOKS["post_release"]=""
+        CUSTOM_HOOKS["pre_activate_previous_release"]=""
+        CUSTOM_HOOKS["post_activate_previous_release"]=""
+        CUSTOM_HOOKS["post_rollback"]=""
     fi
 
     return 0

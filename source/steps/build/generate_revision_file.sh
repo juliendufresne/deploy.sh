@@ -29,7 +29,7 @@ function generate_revision_file
     declare -r revision="$2"
     declare -r repository_path="$3"
     declare -r file="$workspace/.REVISION"
-    declare -r output_file="$(mktemp)"
+    declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     declare -i return_code=0
 
     cd "$repository_path"
