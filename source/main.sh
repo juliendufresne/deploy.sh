@@ -16,6 +16,7 @@ include "tools/push_file_to_servers.sh"
 include "tools/remote_exec.sh"
 include "tools/resolve_option_with_env.sh"
 include "tools/ssh_test_connection.sh"
+include "tools/wrap_command.sh"
 
 # includes every commands here
 include "build.sh"
@@ -68,6 +69,7 @@ ${yellow}Usage:${reset_foreground}
 
 ${yellow}Options:${reset_foreground}
   ${green}-h, --help${reset_foreground}             Display this help message
+  ${green}-q, --quiet${reset_foreground}            Disable output except for errors.
   ${green}-v|vv|vvv, --verbose${reset_foreground}   Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 
 ${yellow}Available commands:${reset_foreground}
@@ -84,6 +86,8 @@ function main
 {
     do_not_run_twice
     declare command_name="deploy"
+
+    declare -g VERBOSITY_LEVEL=0
 
     if [[ "$#" -ge 1 ]]
     then
@@ -108,6 +112,38 @@ function main
                 done
         esac
     fi
+
+    # we can not change the $@ array outside of this function
+
+    declare -a option_left=()
+    for option in "$@"
+    do
+        case "$option" in
+            -q|--quiet)
+                VERBOSITY_LEVEL=-1
+                ;;
+            -v|--verbose)
+                VERBOSITY_LEVEL=1
+                ;;
+            -vv)
+                VERBOSITY_LEVEL=2
+                ;;
+            -vvv)
+                VERBOSITY_LEVEL=3
+                ;;
+            *)
+                option_left+=("$option")
+        esac
+    done
+    set -- "${option_left[@]}"
+
+    # deprecated. For compatibility only
+    declare -g DEBUG=false
+    [[ $VERBOSITY_LEVEL -eq 3 ]] && DEBUG=true
+    declare -g VERY_VERBOSE=false
+    [[ $VERBOSITY_LEVEL -ge 2 ]] && VERY_VERBOSE=true
+    declare -g VERBOSE=false
+    [[ $VERBOSITY_LEVEL -ge 1 ]] && VERBOSE=true
 
     case "$command_name" in
         "build")

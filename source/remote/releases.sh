@@ -43,14 +43,10 @@ function clean_last_release
     rm --recursive --force --preserve-root "$releases_path/$last_release" || {
         return_code=1
 
-        error "Server $hostname: Something went wrong while removing last release '$releases_path/$last_release'"
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        cat "$output_file"
+        error_with_output_file "$output_file" "Server $hostname: Something went wrong while removing last release '$releases_path/$last_release'"
     }
 
-    rm "$output_file"
+    [[ -f "$output_file" ]] && rm "$output_file"
     cd "$OLDPWD"
 
     return ${return_code}

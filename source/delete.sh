@@ -41,20 +41,21 @@ function delete
     declare current_path
     declare releases_path
     declare shared_path
+    declare -i return_code=0
 
     parse_delete_command_line "deploy_path" "current_path" "releases_path" "shared_path" "$@" && \
     ssh_test_connection && \
-    display_title 1 "Deleting application on servers" && \
+    display_title "Deleting application on servers" && \
+    increase_title_level
     remote_exec_function "delete_application" "$deploy_path" "$current_path" "$releases_path" "$shared_path" || {
-        declare -r -i return_code=$?
+        return_code=$?
 
         printf "\n"
         delete_usage
         printf "\n"
-
-        return ${return_code}
     }
+    decrease_title_level
 
-    return 0
+    return ${return_code}
 }
 readonly -f "delete"

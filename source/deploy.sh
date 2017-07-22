@@ -23,6 +23,7 @@ ${yellow}Options:${reset_foreground}
   ${green}-c, --current CURRENT_PATH${reset_foreground}    Specify the path of the current published version (incompatible with --deploy)
   ${green}-r, --releases RELEASES_PATH${reset_foreground}  Specify where every releases are stored (incompatible with --deploy)
   ${green}-s, --shared SHARED_PATH${reset_foreground}      Specify where every persistent files and directories are stored (incompatible with --deploy)
+  ${green}-q, --quiet${reset_foreground}                              Disable output except for errors.
   ${green}-v|vv|vvv, --verbose${reset_foreground}   Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 "
 }
@@ -34,7 +35,7 @@ function deploy_usage
     declare -r yellow="\e[33m"
     declare -r reset_foreground="\e[39m"
 
-    printf "${green}deploy [-h|--help] [-v|vv|vvv|--verbose] [-p|--repository-path REPOSITORY_PATH] [-u|--repository-url REPOSITORY_URL] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file> <revision> [<server-name> ...]${reset_foreground}\n"
+    printf "${green}deploy [-h|--help] [-q|--quiet] [-v|vv|vvv|--verbose] [-p|--repository-path REPOSITORY_PATH] [-u|--repository-url REPOSITORY_URL] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file> <revision> [<server-name> ...]${reset_foreground}\n"
 }
 readonly -f "deploy_usage"
 
@@ -46,9 +47,24 @@ function deploy
     declare -a release_options=()
     declare -a option_filter_server=()
 
-    declare -g DEBUG=false
-    declare -g VERBOSE=false
-    declare -g VERY_VERBOSE=false
+    case "${VERBOSITY_LEVEL}" in
+        -1)
+            build_options+=("-q")
+            release_options+=("-q")
+            ;;
+        1)
+            build_options+=("-v")
+            release_options+=("-v")
+            ;;
+        2)
+            build_options+=("-vv")
+            release_options+=("-vv")
+            ;;
+        3)
+            build_options+=("-vvv")
+            release_options+=("-vvv")
+        ;;
+    esac
 
     declare -i current_argument_number="0"
     while [[ "$#" -gt 0 ]]
@@ -60,18 +76,6 @@ function deploy
                 # this command must return 0 and stop execution.
                 # But return 0 will not stop the execution
                 exit "0"
-                ;;
-            -v|--verbose)
-                VERBOSE=true
-                ;;
-            -vv)
-                VERBOSE=true
-                VERY_VERBOSE=true
-                ;;
-            -vvv)
-                VERBOSE=true
-                VERY_VERBOSE=true
-                DEBUG=true
                 ;;
             --repository-path=*)
                 build_options+=("--repository-path" "${1#*=}")
@@ -140,21 +144,7 @@ function deploy
         shift
     done
 
-    if ${DEBUG}
-    then
-        build_options+=("-vvv")
-        release_options+=("-vvv")
-    elif ${VERY_VERBOSE}
-    then
-        build_options+=("-vv")
-        release_options+=("-vv")
-    elif ${VERBOSE}
-    then
-        build_options+=("-v")
-        release_options+=("-v")
-    fi
-
-    ${VERBOSE} && section "Building revision"
+    section "Building revision"
 
     DEPLOY_SHOW_USAGE_ON_ERROR=false $0 build "${build_options[@]}" || {
         declare -r -i return_code=$?
@@ -168,7 +158,7 @@ function deploy
         return ${return_code}
     }
 
-    ${VERBOSE} && section_done "revision build"
+    section_done "revision built"
 
     # get the archive
     release_options+=("$archive_dir/$(ls -1 "$archive_dir")")
@@ -177,7 +167,7 @@ function deploy
         release_options+=("${option_filter_server[@]}")
     fi
 
-    ${VERBOSE} && section "Releasing"
+    section "Releasing"
 
     DEPLOY_SHOW_USAGE_ON_ERROR=false $0 release "${release_options[@]}" || {
         declare -r -i return_code=$?
@@ -191,7 +181,7 @@ function deploy
         return ${return_code}
     }
 
-    ${VERBOSE} && section_done "Release done"
+    section_done "Release done"
 
     rm --recursive --preserve-root "$archive_dir"
 

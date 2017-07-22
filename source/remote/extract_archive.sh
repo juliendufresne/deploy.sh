@@ -14,23 +14,13 @@ function extract_archive
     get_hostname "hostname"
 
     cd "$releases_path" &>"$output_file" || {
-        error "Server $hostname: Unable to enter release directory $releases_path."
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        >&2 cat "$output_file"
-        rm "$output_file"
+        error_with_output_file "$output_file" "Server $hostname: Unable to enter release directory $releases_path."
 
         return 1
     }
 
     tar --extract --file "$archive_filename" &>"$output_file" || {
-        error "Server $hostname: Unable to extract archive $archive_filename."
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        >&2 cat "$output_file"
-        rm "$output_file"
+        error_with_output_file "$output_file" "Server $hostname: Unable to extract archive $archive_filename."
 
         return 1
     }
@@ -38,24 +28,14 @@ function extract_archive
     if [[ "$archive_dir" != "$release_name" ]]
     then
         mv "$archive_dir" "$release_name" &>"$output_file" || {
-            error "Server $hostname: Unable to move extracted archive $archive_dir in $release_name."
-    
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            >&2 cat "$output_file"
-            rm "$output_file"
-    
+            error_with_output_file "$output_file" "Server $hostname: Unable to move extracted archive $archive_dir in $release_name."
+
             return 1
         }
     fi
 
     rm "$archive_filename" &>"$output_file" || {
-        error "Server $hostname: Unable to remove archive $archive_filename."
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        >&2 cat "$output_file"
-        rm "$output_file"
+        error_with_output_file "$output_file" "Server $hostname: Unable to remove archive $archive_filename."
 
         return 1
     }

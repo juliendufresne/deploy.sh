@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+if ! [[ -v TITLE_LEVEL ]]
+then
+    declare -g -i TITLE_LEVEL=1
+fi
+
+function increase_title_level
+{
+    TITLE_LEVEL=$((TITLE_LEVEL + 1))
+}
+
+function decrease_title_level
+{
+    TITLE_LEVEL=$((TITLE_LEVEL - 1))
+}
+
+function reset_title_level
+{
+    TITLE_LEVEL=1
+}
+
 function _get_log_file
 {
     declare -n _log_file="$1"
@@ -29,6 +49,8 @@ function _get_log_file
 
 function header
 {
+    is_quiet && return 0
+
     declare -r title="$1"
     declare -r underline_char="${2:-=}"
     declare -r -i title_length="$(echo -ne "$title" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" | wc -c)"
@@ -44,6 +66,8 @@ function header
 
 function section
 {
+    is_quiet && return 0
+
     header "$1" "-"
 }
 
@@ -60,6 +84,8 @@ function section
 #
 function section_description
 {
+    is_quiet && return 0
+
     declare -r prefix='  // '
     declare -i current_string_output_length='0'
     declare -i index='0'
@@ -102,6 +128,8 @@ function section_description
 
 function section_done
 {
+    is_quiet && return 0
+
     declare is_first_line=true
     declare -r prefix_first=' [OK] '
     declare -r prefix_other='      '
@@ -134,38 +162,21 @@ function section_done
 
 function display_title
 {
+    is_quiet && return 0
+
     # level should be one-based (starting from 1). Level 0 is considered a section
-    declare -ri level="$1"
-    declare -r name="$2"
+    declare -r name="$1"
     declare -r symbols=" >+-*ø§"
     declare symbol="§"
 
-    if [[ "${level}" -lt "${#symbols}" ]]
+    if [[ "${TITLE_LEVEL}" -lt "${#symbols}" ]]
     then
-        symbol=${symbols:${level}:1}
+        symbol=${symbols:${TITLE_LEVEL}:1}
     fi
 
     # display (level * 2) spaces
-    printf ' %.0s' `seq 1 $((level * 2))`
+    printf ' %.0s' `seq 1 $((TITLE_LEVEL * 2))`
     printf '\e[35m%s\e[34m %b\e[0m\n' "${symbol}" "$name"
-}
-
-# deprecated. Use `display_title <level> <title_name> instead`
-function action
-{
-    display_title 1 "$1"
-}
-
-# deprecated. Use `display_title <level> <title_name> instead`
-function sub_action
-{
-    display_title 2 "$1"
-}
-
-# deprecated. Use `display_title <level> <title_name> instead`
-function action_level_3
-{
-    display_title 3 "$1"
 }
 
 function warning
@@ -207,7 +218,7 @@ function block
         params+=("$message")
     done
 
-    if [[ -v DEBUG ]] && ${DEBUG}
+    if is_debug
     then
         params+=("occurred on ${BASH_SOURCE[1]}:${BASH_LINENO[1]}")
     fi
@@ -230,4 +241,45 @@ function block
         [[ -n "$log_file" ]] && printf "[%s] %s %s\n" "$(date "+%Y%m%d%H%M%S")" "$prefix_first" "$message" >> "$log_file"
     done
     printf ' %b%*.*s%b\n' "$color" '0' "$((terminal_length - 1))" "$pad" "$reset" >"$redirection"
+}
+
+function error_with_output_file
+{
+    declare -r output_file="$1"
+    shift
+
+    error "$@"
+
+    >&2 printf 'Following is the output of the command\n'
+    >&2 printf '######################################\n'
+    >&2 cat "$output_file"
+    rm "$output_file"
+}
+
+function is_quiet
+{
+    [[ ${VERBOSITY_LEVEL} -eq -1 ]] && return 0
+
+    return 1
+}
+
+function is_verbose
+{
+    [[ ${VERBOSITY_LEVEL} -ge 1 ]] && return 0
+
+    return 1
+}
+
+function is_very_verbose
+{
+    [[ ${VERBOSITY_LEVEL} -ge 2 ]] && return 0
+
+    return 1
+}
+
+function is_debug
+{
+    [[ ${VERBOSITY_LEVEL} -ge 3 ]] && return 0
+
+    return 1
 }

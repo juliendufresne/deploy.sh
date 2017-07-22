@@ -6,7 +6,10 @@ function ensure_directory_structure_exists
     declare -r releases_path="$2"
     declare -r shared_path="$3"
 
-    ${VERBOSE} && display_title 1 "Ensuring directory structure exists on servers"
+    reset_title_level
+    display_title "Ensuring directory structure exists on servers"
+    increase_title_level
+
     remote_exec_function "ensure_directory_structure_exists" "$current_path" "$releases_path" "$shared_path" || return $?
 
     return 0

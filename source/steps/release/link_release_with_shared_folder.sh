@@ -26,7 +26,10 @@ function link_release_with_shared_folder
     declare -r release_path="$1"
     declare -r shared_path="$2"
 
-    ${VERBOSE} && display_title 1 "Linking release with shared items"
+    reset_title_level
+    display_title "Linking release with shared items"
+    increase_title_level
+
     remote_exec_function "link_shared_to_release" "$release_path" "$shared_path" "${DEPLOY_SHARED_ITEMS[@]}" || return $?
     call_remote_hook "post_link_release_with_shared_folder" true "$release_path" "$shared_path" || return $?
 

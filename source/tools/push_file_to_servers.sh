@@ -2,19 +2,6 @@
 
 function push_file_to_servers_ensure_var_exists
 {
-    # simple vars
-    for defined_variable_name in "DEBUG" "VERY_VERBOSE"
-    do
-        if ! [[ -v "$defined_variable_name" ]]
-        then
-            DEBUG=
-            VERY_VERBOSE=
-            error "Something unexpected happened: $defined_variable_name should be defined"
-
-            return 1
-        fi
-    done
-
     # arrays
     for defined_variable_name in "FILTERED_DEPLOY_SERVER_LIST" "DEPLOY_RSYNC_OPTIONS"
     do
@@ -42,6 +29,15 @@ function push_file_to_servers
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
+
+        if is_verbose
+        then
+            declare server_name="$deploy_ssh_server"
+            declare regex='^[0-9]+$'
+            [[ "$server_name" =~ $regex ]] && server_name="#$server_name"
+            display_title "server \e[32m$server_name\e[39;49m"
+        fi
+
         push_file_to_server "$server" "$file" "$destination" "$deploy_ssh_server" || return 1
     done
 
@@ -62,7 +58,7 @@ function push_file_to_server
     push_file_to_servers_ensure_var_exists || return $?
 
     declare -a rsync_options=("--safe-links" "--executability")
-    ${VERY_VERBOSE} || rsync_options+=("--quiet")
+    is_very_verbose || rsync_options+=("--quiet")
 
     if [[ "${#DEPLOY_RSYNC_OPTIONS[@]}" -gt 0 ]]
     then
@@ -71,17 +67,10 @@ function push_file_to_server
 
     declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
     rsync "${rsync_options[@]}" "$file" "$server:$destination" &>"$output_file" || {
-        error "Unable to send file to server $server_name"
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        cat "$output_file"
-        rm "$output_file"
+        error_with_output_file "$output_file" "Unable to send file to server $server_name"
 
         return 1
     }
-
-    ${DEBUG} && cat "$output_file"
 
     rm "$output_file"
 

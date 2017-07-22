@@ -5,7 +5,9 @@ function find_previous_release
     declare -r releases_path="$1"
     declare -n previous_release="$2"
 
-    ${VERBOSE} && display_title 1 "Finding previous release"
+    reset_title_level
+    display_title "Finding previous release"
+    increase_title_level
 
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do

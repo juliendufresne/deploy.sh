@@ -7,7 +7,9 @@ function extract_archive
     declare -r release_date="$3"
     declare -r archive_filename="$(basename "$archive")"
 
-    ${VERBOSE} && display_title 1 "Extracting archive"
+    reset_title_level
+    display_title "Extracting archive"
+    increase_title_level
 
     # Archive will be extracted on every server but may fail on one server. we should remove extracted archive
     DEPLOY_CURRENT_RELEASE_DIR="$releases_path/$release_date"
