@@ -29,6 +29,7 @@ Note: every options can be defined with environment variable with prefix DEPLOY_
   ${green}-c, --current CURRENT_PATH${reset_foreground}    Specify the path of the current published version (incompatible with --deploy)
   ${green}-r, --releases RELEASES_PATH${reset_foreground}  Specify where every releases are stored (incompatible with --deploy)
   ${green}-s, --shared SHARED_PATH${reset_foreground}      Specify where every persistent files and directories are stored (incompatible with --deploy)
+  ${green}-q, --quiet${reset_foreground}                   Disable output except for errors.
   ${green}-v|vv|vvv, --verbose${reset_foreground}          Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 "
 }
@@ -40,7 +41,7 @@ function display_release_usage
     declare -r yellow="\e[33m"
     declare -r reset_foreground="\e[39m"
 
-    printf "${green}release [-h|--help] [-v|vv|vvv|--verbose] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file> <archive-file> [<server-name> ...]${reset_foreground}\n"
+    printf "${green}release [-h|--help] [-q|--quiet] [-v|vv|vvv|--verbose] [-d|--deploy PATH] [-c|--current CURRENT_PATH] [-r|--releases RELEASES_PATH] [-s|--shared SHARED_PATH] <config-file> <archive-file> [<server-name> ...]${reset_foreground}\n"
 }
 readonly -f "display_release_usage"
 

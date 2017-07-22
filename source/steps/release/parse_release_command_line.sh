@@ -22,9 +22,7 @@ function parse_release_command_line
     option_current_path=""
     option_releases_path=""
     option_shared_path=""
-    declare -g DEBUG=false
-    declare -g VERBOSE=false
-    declare -g VERY_VERBOSE=false
+
     declare -g DEPLOY_MAX_RELEASES="0"
 
     declare -i current_argument_number="0"
@@ -38,18 +36,6 @@ function parse_release_command_line
                 # this command must return 0 and stop execution.
                 # But return 0 will not stop the execution
                 exit "0"
-                ;;
-            -v|--verbose)
-                VERBOSE=true
-                ;;
-            -vv)
-                VERBOSE=true
-                VERY_VERBOSE=true
-                ;;
-            -vvv)
-                VERBOSE=true
-                VERY_VERBOSE=true
-                DEBUG=true
                 ;;
             --deploy=*)
                 command_line_parse_single_option "option --deploy" "option_deploy_path" "$option_deploy_path" "${1#*=}" || return $?
@@ -105,20 +91,6 @@ function parse_release_command_line
     # this is - obviously - the only variable that can not be set in the config file
     [[ -z "$option_config_file" ]] && resolve_option_with_env "option_config_file" "DEPLOY_CONFIG_FILE"
     release_option_load_config_file "$option_config_file" || return $?
-    ${VERBOSE} || resolve_option_with_env "VERBOSE" "DEPLOY_VERBOSE"
-    ${VERY_VERBOSE} || resolve_option_with_env "VERY_VERBOSE" "DEPLOY_VERY_VERBOSE"
-    ${DEBUG} || resolve_option_with_env "DEBUG" "DEPLOY_DEBUG"
-
-    # ensure verbosity level is consistent
-    if ${DEBUG}
-    then
-        VERY_VERBOSE=true
-        VERBOSE=true
-    fi
-    if ${VERY_VERBOSE}
-    then
-        VERBOSE=true
-    fi
 
     [[ -z "$option_archive_file" ]] && resolve_option_with_env "option_archive_file" "DEPLOY_ARCHIVE_FILE"
     release_option_validate_archive_file "option_archive_file" || return $?
@@ -134,7 +106,7 @@ function parse_release_command_line
     release_option_validate_release_number || return $?
     release_option_validate_connect_option || return $?
 
-    if ${DEBUG}
+    if is_debug
     then
         declare -r green="\e[32m"
         declare -r yellow="\e[33m"
@@ -155,9 +127,6 @@ Resolved inputs
       ${green}-c, --current CURRENT_PATH${reset_foreground}    $option_current_path
       ${green}-r, --releases RELEASES_PATH${reset_foreground}  $option_releases_path
       ${green}-s, --shared SHARED_PATH${reset_foreground}      $option_shared_path
-      ${green}-v, --verbose${reset_foreground}                 $VERBOSE
-      ${green}-vv${reset_foreground}                           $VERY_VERBOSE
-      ${green}-vvv${reset_foreground}                          $DEBUG
 
 "
     fi
@@ -189,9 +158,7 @@ function release_option_load_config_file
         return 1
     }
     # In case config file has unset those variables
-    [[ -v VERBOSE ]] || VERBOSE=false
-    [[ -v VERY_VERBOSE ]] || VERY_VERBOSE=false
-    [[ -v DEBUG ]] || DEBUG=false
+    [[ -v VERBOSITY_LEVEL ]] || VERBOSITY_LEVEL=0
 
     return 0
 }

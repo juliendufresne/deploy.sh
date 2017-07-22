@@ -24,11 +24,7 @@ function extract_revision_file_from_archive
 
     tar --extract --to-stdout --file "$archive_file" "$commit/.REVISION" > "$revision_file" 2>"$output_file" || {
         return_code=1
-        error "Something went wrong while trying to get the .REVISION file from archive $archive_file"
-
-        >&2 printf 'Following is the output of the command\n'
-        >&2 printf '######################################\n'
-        cat "$output_file"
+        error_with_output_file "$output_file" "Something went wrong while trying to get the .REVISION file from archive $archive_file"
     }
 
     rm "$output_file"

@@ -25,6 +25,7 @@ Note: every options can be defined with environment variable with prefix DEPLOY_
   ${green}-f, --config-file=CONFIG_FILE${reset_foreground}            Path of a config file containing extra build action.
   ${green}-p, --repository-path=REPOSITORY_PATH${reset_foreground}    Path of where to store local git repository.
   ${green}-u, --repository-url=REPOSITORY_URL${reset_foreground}      Url of remote repository.
+  ${green}-q, --quiet${reset_foreground}                              Disable output except for errors.
   ${green}-v|vv|vvv, --verbose${reset_foreground}                     Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug.
 "
 }
@@ -36,7 +37,7 @@ function display_build_usage
     declare -r yellow="\e[33m"
     declare -r reset_foreground="\e[39m"
 
-    printf "${green}build [-h|--help] [-v|vv|vvv|--verbose] [-a|--archive-dir ARCHIVE_DIR] [-f|--config-file CONFIG_FILE] [-p|--repository-path REPOSITORY_PATH] [-u|--repository-url REPOSITORY_URL] <revision>${reset_foreground}\n"
+    printf "${green}build [-h|--help] [-q|--quiet] [-v|vv|vvv|--verbose] [-a|--archive-dir ARCHIVE_DIR] [-f|--config-file CONFIG_FILE] [-p|--repository-path REPOSITORY_PATH] [-u|--repository-url REPOSITORY_URL] <revision>${reset_foreground}\n"
 }
 readonly -f "display_build_usage"
 

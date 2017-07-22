@@ -2,20 +2,6 @@
 
 function ssh_test_connection_ensure_var_exists
 {
-    # simple vars
-    for defined_variable_name in "VERBOSE" "VERY_VERBOSE" "DEBUG"
-    do
-        if ! [[ -v "$defined_variable_name" ]]
-        then
-            VERBOSE=
-            VERY_VERBOSE=
-            DEBUG=
-            error "Something unexpected happened: $defined_variable_name should be defined"
-
-            return 1
-        fi
-    done
-
     # arrays
     for defined_variable_name in "FILTERED_DEPLOY_SERVER_LIST" "DEPLOY_SSH_OPTIONS"
     do
@@ -36,10 +22,13 @@ readonly -f "ssh_test_connection_ensure_var_exists"
 function ssh_test_connection
 {
     do_not_run_twice || return $?
-    ${VERBOSE} && display_title 1 "Testing remote server connectivity"
+    reset_title_level
+    display_title "Testing remote server connectivity"
+    increase_title_level
+
     ssh_test_connection_ensure_var_exists || return $?
 
-    declare output_file="$(mktemp -t deploy.XXXXXXXXXX)"
+    declare -i return_code=0
     declare -a ssh_command_options=("-vvv" "-T")
     if [[ "${#DEPLOY_SSH_OPTIONS[@]}" -gt 0 ]]
     then
@@ -53,22 +42,31 @@ function ssh_test_connection
         declare regex='^[0-9]+$'
         [[ "$server_name" =~ $regex ]] && server_name="#$server_name"
 
-        ${VERY_VERBOSE} && display_title 2 "server \e[32m$server_name\e[39;49m"
+        is_verbose && display_title "server \e[32m$server_name\e[39m"
 
+        if is_debug
+        then
+            declare title="ssh"
+            for ssh_command in "${ssh_command_options[@]}"
+            do
+                title="$title $ssh_command"
+            done
+            increase_title_level
+            display_title "\e[33m$title $server exit\e[39m"
+            decrease_title_level
+        fi
+
+        declare output_file="$(mktemp -t deploy.XXXXXXXXXX)"
         if ! ssh "${ssh_command_options[@]}" "$server" exit &>"$output_file"
         then
-            error "Unable to connect to server $server_name."
+            error_with_output_file "$output_file" "Unable to connect to server $server_name."
 
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            cat "$output_file"
+            return_code=1
+        else
             rm "$output_file"
-
-            return 1
         fi
     done
-    rm "$output_file"
 
-    return 0
+    return ${return_code}
 }
 readonly -f "ssh_test_connection"

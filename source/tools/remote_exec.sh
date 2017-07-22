@@ -5,14 +5,11 @@ include "tools/push_file_to_servers.sh"
 function remote_exec_ensure_var_exists
 {
     # simple vars
-    for defined_variable_name in "DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" "VERBOSE" "VERY_VERBOSE" "DEBUG"
+    for defined_variable_name in "DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL"
     do
         if ! [[ -v "$defined_variable_name" ]]
         then
             DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL=""
-            VERBOSE=
-            VERY_VERBOSE=
-            DEBUG=
             error "Something unexpected happened: $defined_variable_name should be defined"
 
             return 1
@@ -97,11 +94,23 @@ function remote_exec_function
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
         server_index=$((server_index + 1))
 
+        if is_verbose
+        then
+            declare server_name="$deploy_ssh_server"
+            declare regex='^[0-9]+$'
+            [[ "$server_name" =~ $regex ]] && server_name="#$server_name"
+            display_title "server \e[32m$server_name\e[39;49m"
+            increase_title_level
+        fi
+
         ssh "${ssh_command_options[@]}" "$server" bash -c "'
 #!/usr/bin/env bash
 source "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}"
+declare -g TITLE_LEVEL=${TITLE_LEVEL}
 ${function_name} $server_index $@ || exit \"\$?\"
 '" || return $?
+
+        is_verbose && decrease_title_level
     done
 
     return 0
@@ -164,6 +173,7 @@ function create_remote_script_file
 declare -g VERBOSE=${VERBOSE}
 declare -g VERY_VERBOSE=${VERY_VERBOSE}
 declare -g DEBUG=${DEBUG}
+declare -g -i VERBOSITY_LEVEL=${VERBOSITY_LEVEL}
 EndOfScript
 
     # raw string

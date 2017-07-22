@@ -63,6 +63,8 @@ function call_hook
         return 0
     fi
 
+    display_title "Hook \e[32m$hook_name\e[39m"
+    increase_title_level
     IFS=";" read -ra hooks <<< "${CUSTOM_HOOKS[$hook_name]}"
 
     for user_defined_function_name in "${hooks[@]}"
@@ -75,6 +77,8 @@ function call_hook
             return ${return_code}
         }
     done
+
+    decrease_title_level
 
     return 0
 }
@@ -99,6 +103,9 @@ function call_remote_hook
         return 0
     fi
 
+    display_title "Hook \e[32m$hook_name\e[39m"
+    increase_title_level
+
     IFS=";" read -ra hooks <<< "${CUSTOM_HOOKS[$hook_name]}"
 
     for user_defined_function_name in "${hooks[@]}"
@@ -113,6 +120,7 @@ function call_remote_hook
             fi
         }
     done
+    decrease_title_level
 
     return ${return_code}
 }

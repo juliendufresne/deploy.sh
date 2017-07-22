@@ -6,7 +6,9 @@ function send_archive_to_servers
     declare -r archive="$2"
     declare -r archive_filename="$(basename "$archive")"
 
-    ${VERBOSE} && display_title 1 "Sending archive"
+    reset_title_level
+    display_title "Sending archive"
+    increase_title_level
 
     call_hook "pre_send_archive_to_servers" "$archive" || return $?
     push_file_to_servers "$archive" "$releases_path/$archive_filename" || return $?

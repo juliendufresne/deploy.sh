@@ -29,12 +29,7 @@ function ensure_directory_structure_exists
 
         if ! [[ -d "$directory" ]] && ! mkdir --parents "$directory" &>"$output_file"
         then
-            error "Server $hostname: Unable to create directory $directory"
-
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            >&2 cat "$output_file"
-            rm "$output_file"
+            error_with_output_file "$output_file" "Server $hostname: Unable to create directory $directory"
 
             return 1
         fi

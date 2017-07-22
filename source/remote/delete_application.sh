@@ -17,12 +17,7 @@ function delete_application
     if [[ -e "$current_release_path" ]]
     then
         rm --preserve-root "$current_release_path" &>"${output_file}" || {
-            error "Server $hostname: Unable to remove current release path $current_release_path."
-
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            >&2 cat "$output_file"
-            rm "$output_file"
+            error_with_output_file "$output_file" "Server $hostname: Unable to remove current release path $current_release_path."
 
             return 1
         }
@@ -33,12 +28,7 @@ function delete_application
     if [[ -e "$release_root_path" ]]
     then
         rm --preserve-root --recursive "$release_root_path" &>"${output_file}" || {
-            error "Server $hostname: Unable to remove release root path $release_root_path."
-
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            >&2 cat "$output_file"
-            rm "$output_file"
+            error_with_output_file "$output_file" "Server $hostname: Unable to remove release root path $release_root_path."
 
             return 1
         }
@@ -48,12 +38,7 @@ function delete_application
     if [[ -e "$shared_root_path" ]]
     then
         rm --preserve-root --recursive "$shared_root_path" &>"${output_file}" || {
-            error "Server $hostname: Unable to remove shared root path $shared_root_path."
-
-            >&2 printf 'Following is the output of the command\n'
-            >&2 printf '######################################\n'
-            >&2 cat "$output_file"
-            rm "$output_file"
+            error_with_output_file "$output_file" "Server $hostname: Unable to remove shared root path $shared_root_path."
 
             return 1
         }
@@ -73,12 +58,7 @@ function delete_application
                     "Hence we did not delete the folder in order to let you choose what you want to do with those files."
         else
             rm --preserve-root --recursive "$deploy_to" &>"${output_file}" || {
-                error "Server $hostname: Unable to remove deploy_to path $deploy_to."
-
-                >&2 printf 'Following is the output of the command\n'
-                >&2 printf '######################################\n'
-                >&2 cat "$output_file"
-                rm "$output_file"
+                error_with_output_file "$output_file" "Server $hostname: Unable to remove deploy_to path $deploy_to."
 
                 return 1
             }

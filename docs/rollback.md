@@ -40,19 +40,7 @@ deploy rollback
 ## Options
 
 Options can be passed as environment variable, as variable defined in the config file, as command line argument or as command line variable.  
-Options defined in command line take precedence.  
-Example for the VERBOSE mode option:
-
-```bash
-# command line argument
-deploy rollback -v ...
-# command line variable
-DEPLOY_VERBOSE=true deploy rollback ...
-# variable defined in the config file
-declare -g DEPLOY_VERBOSE=true
-# environment variable
-export DEPLOY_VERBOSE=true
-```
+Options defined in command line take precedence.
 
 ### Deploy
 
