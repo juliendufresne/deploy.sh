@@ -23,9 +23,11 @@ function push_file_to_servers
 {
     declare -r file="$1"
     declare -r destination="$2"
+    declare -g DEPLOY_CURRENT_PUSHED_FILE="$destination"
 
     push_file_to_servers_ensure_var_exists || return $?
 
+    declare -r pid_dir="$(mktemp -d -t "deploy-pid.XXXXXXXXXX")"
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
@@ -38,10 +40,30 @@ function push_file_to_servers
             display_title "server \e[32m$server_name\e[39;49m"
         fi
 
-        push_file_to_server "$server" "$file" "$destination" "$deploy_ssh_server" || return 1
+        {
+            push_file_to_server "$server" "$file" "$destination" "$deploy_ssh_server"
+
+            printf "$?" > "$pid_dir/$BASHPID"
+        } &
     done
 
-    return 0
+    wait
+
+    declare -i return_code=0
+    for pid_file in "$pid_dir"/*
+    do
+        declare current_return_code="$(cat "$pid_file")"
+        if [[ ${current_return_code} -ne 0 ]]
+        then
+            return_code="$current_return_code"
+            break
+        fi
+    done
+    [[ ${return_code} -eq 0 ]] && unset DEPLOY_CURRENT_PUSHED_FILE
+
+    rm -rf "$pid_dir"
+
+    return ${return_code}
 }
 readonly -f "push_file_to_servers"
 
