@@ -49,6 +49,7 @@ function cleanup_local_script
 {
     if ! [[ -z "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]] && [[ -f "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL" ]]
     then
+        is_verbose && display_title "remove local temporary files"
         rm "$DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL"
         DEPLOY_REMOTE_SCRIPT_FILE_ON_LOCAL=""
     fi
@@ -64,6 +65,7 @@ function cleanup_remote_scripts
     # each server store the script file on its own path (different from each other)
     if [[ "${#DEPLOY_REMOTE_SCRIPT_FILES[@]}" -gt 0 ]]
     then
+        is_verbose && display_title "remove remote temporary files" && increase_title_level
         for server_name in "${!DEPLOY_REMOTE_SCRIPT_FILES[@]}"
         do
             remote_exec_command_on_server_name "$server_name" "rm" "--preserve-root" "${DEPLOY_REMOTE_SCRIPT_FILES[$server_name]}" &>"$output_file" || {
@@ -71,6 +73,22 @@ function cleanup_remote_scripts
                 cat "$output_file"
             }
         done
+        is_verbose && decrease_title_level
+    fi
+
+    if [[ -v DEPLOY_CURRENT_PUSHED_FILE ]]
+    then
+        is_verbose && display_title "remove file pushed to remote" && increase_title_level
+        for server_name in "${!DEPLOY_REMOTE_SCRIPT_FILES[@]}"
+        do
+            # --recursive because we might trying to remove a directory
+            # --force because the server might not have the file
+            remote_exec_command_on_server_name "$server_name" "rm" "--preserve-root" "--recursive" "--force" "$DEPLOY_CURRENT_PUSHED_FILE" &>"$output_file" || {
+                warning "Unable to clean temporary script file on server $server_name"
+                cat "$output_file"
+            }
+        done
+        is_verbose && decrease_title_level
     fi
 
     rm "$output_file"
@@ -86,7 +104,9 @@ function cleanup_deployed_release
         return 0
     fi
 
+    is_verbose && display_title "remove release directory" && increase_title_level
     remote_exec_function "remove_currently_deployed_release" "$DEPLOY_CURRENT_RELEASE_DIR"
+    is_verbose && decrease_title_level
 
     return 0
 }
@@ -97,9 +117,12 @@ function release_cleanup
     # we don't want to stop execution on failure here because we clean up everything.
     set +e
 
-    cleanup_local_script
-    cleanup_remote_scripts
+    is_verbose && display_title "Cleaning up" && increase_title_level
     cleanup_deployed_release
+    cleanup_remote_scripts
+    # must be the last one because previous functions uses it
+    cleanup_local_script
+    is_verbose && decrease_title_level
 }
 readonly -f "release_cleanup"
 
