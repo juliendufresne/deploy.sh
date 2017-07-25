@@ -54,5 +54,7 @@ function do_create_archive
     }
 
     cd "$OLDPWD"
+
+    return ${return_code}
 }
 readonly -f "do_create_archive"
