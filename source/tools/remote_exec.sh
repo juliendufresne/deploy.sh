@@ -34,6 +34,7 @@ function remote_exec_ensure_var_exists
 }
 readonly -f "remote_exec_ensure_var_exists"
 
+# Execute a custom command on a specific server
 function remote_exec_command_on_server_name
 {
     declare -r index_on_config_servers="$1"
@@ -89,6 +90,8 @@ function remote_exec_function
         ssh_command_options+=("${DEPLOY_SSH_OPTIONS[@]}")
     fi
 
+    declare -r pid_dir="$(mktemp -d -t "deploy-pid.XXXXXXXXXX")"
+
     for deploy_ssh_server in "${!FILTERED_DEPLOY_SERVER_LIST[@]}"
     do
         declare server="${FILTERED_DEPLOY_SERVER_LIST[$deploy_ssh_server]}"
@@ -103,17 +106,36 @@ function remote_exec_function
             increase_title_level
         fi
 
-        ssh "${ssh_command_options[@]}" "$server" bash -c "'
+        {
+            ssh "${ssh_command_options[@]}" "$server" bash -c "'
 #!/usr/bin/env bash
 source "${DEPLOY_REMOTE_SCRIPT_FILES["$deploy_ssh_server"]}"
 declare -g TITLE_LEVEL=${TITLE_LEVEL}
+
 ${function_name} $server_index $@ || exit \"\$?\"
-'" || return $?
+'"
+            printf "$?" > "$pid_dir/$BASHPID"
+        } &
 
         is_verbose && decrease_title_level
     done
 
-    return 0
+    wait
+
+    declare -i return_code=0
+    for pid_file in "$pid_dir"/*
+    do
+        declare current_return_code="$(cat "$pid_file")"
+        if [[ ${current_return_code} -ne 0 ]]
+        then
+            return_code="$current_return_code"
+            break
+        fi
+    done
+
+    rm -rf "$pid_dir"
+
+    return ${return_code}
 }
 readonly -f "remote_exec_function"
 
