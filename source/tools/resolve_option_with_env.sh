@@ -5,7 +5,7 @@ function resolve_option_with_env
     declare -n _ref="$1"
     declare -r environment_variable_name="$2"
 
-    if ( set -o posix ; set ) | grep -E -q "^$environment_variable_name="
+    if compgen -A variable ${environment_variable_name} &>/dev/null
     then
         _ref="${!environment_variable_name}"
     fi
