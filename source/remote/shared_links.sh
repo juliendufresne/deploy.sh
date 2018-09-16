@@ -77,7 +77,7 @@ function link_shared_to_release
 
         if [[ -e "$new_release_directory/$item" ]]
         then
-            rm --recursive --preserve-root --force "$new_release_directory/$item" || {
+            rm --recursive --preserve-root --interactive=never "$new_release_directory/$item" || {
                 error "Server $hostname: Unable to remove shared item $item from release directory $new_release_directory"
 
                 return 1

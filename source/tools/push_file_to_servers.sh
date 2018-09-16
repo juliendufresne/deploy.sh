@@ -61,7 +61,7 @@ function push_file_to_servers
     done
     [[ ${return_code} -eq 0 ]] && unset DEPLOY_CURRENT_PUSHED_FILE
 
-    rm -rf "$pid_dir"
+    rm --recursive --interactive=never "$pid_dir"
 
     return ${return_code}
 }

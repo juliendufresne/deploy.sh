@@ -133,7 +133,7 @@ ${function_name} $server_index $@ || exit \"\$?\"
         fi
     done
 
-    rm -rf "$pid_dir"
+    rm --recursive --interactive=never "$pid_dir"
 
     return ${return_code}
 }

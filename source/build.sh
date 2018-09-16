@@ -46,7 +46,7 @@ function build_cleanup
     # we don't want to stop execution on failure here because we clean up everything.
     set +e
 
-    [[ -n "$_WORKSPACE_DIR" ]] && [[ -d "$_WORKSPACE_DIR" ]] && rm --recursive --preserve-root "$_WORKSPACE_DIR"
+    [[ -n "$_WORKSPACE_DIR" ]] && [[ -d "$_WORKSPACE_DIR" ]] && rm --recursive --preserve-root --interactive=never "$_WORKSPACE_DIR"
     # tarball
     [[ -f "$_WORKSPACE_DIR.tar.bz2" ]] && rm "$_WORKSPACE_DIR.tar.bz2"
 }

@@ -153,7 +153,7 @@ function deploy
         deploy_usage
         printf "\n"
 
-        rm --recursive --preserve-root "$archive_dir"
+        rm --recursive --preserve-root --interactive=never "$archive_dir"
 
         return ${return_code}
     }
@@ -176,14 +176,14 @@ function deploy
         deploy_usage
         printf "\n"
 
-        rm --recursive --preserve-root "$archive_dir"
+        rm --recursive --preserve-root --interactive=never "$archive_dir"
 
         return ${return_code}
     }
 
     section_done "Release done"
 
-    rm --recursive --preserve-root "$archive_dir"
+    rm --recursive --preserve-root --interactive=never "$archive_dir"
 
     return 0
 }

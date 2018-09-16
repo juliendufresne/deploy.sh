@@ -40,7 +40,7 @@ function clean_last_release
     fi
 
     declare -r output_file="$(mktemp -t deploy.XXXXXXXXXX)"
-    rm --recursive --force --preserve-root "$releases_path/$last_release" || {
+    rm --recursive --interactive=never --preserve-root "$releases_path/$last_release" || {
         return_code=1
 
         error_with_output_file "$output_file" "Server $hostname: Something went wrong while removing last release '$releases_path/$last_release'"
@@ -100,7 +100,7 @@ function clean_oldest_releases
             continue
         fi
 
-        rm --recursive --preserve-root "$directory" || {
+        rm --recursive --preserve-root --interactive=never "$directory" || {
             return_code=$?
             error "Server $hostname: Unable to remove release $directory."
         }
@@ -183,7 +183,7 @@ function remove_currently_deployed_release
         return 0
     fi
 
-    rm --recursive --preserve-root "$current_release_path" || {
+    rm --recursive --preserve-root --interactive=never "$current_release_path" || {
         return_code=$?
         error "Server $hostname: Unable to remove release $directory."
     }

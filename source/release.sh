@@ -83,7 +83,7 @@ function cleanup_remote_scripts
         do
             # --recursive because we might trying to remove a directory
             # --force because the server might not have the file
-            remote_exec_command_on_server_name "$server_name" "rm" "--preserve-root" "--recursive" "--force" "$DEPLOY_CURRENT_PUSHED_FILE" &>"$output_file" || {
+            remote_exec_command_on_server_name "$server_name" "rm" "--preserve-root" "--recursive" "--interactive=never" "$DEPLOY_CURRENT_PUSHED_FILE" &>"$output_file" || {
                 warning "Unable to clean temporary script file on server $server_name"
                 cat "$output_file"
             }

@@ -27,7 +27,7 @@ function delete_application
     # it also defines some link towards shared root path so we need to remove it before shared_root_path
     if [[ -e "$release_root_path" ]]
     then
-        rm --preserve-root --recursive "$release_root_path" &>"${output_file}" || {
+        rm --preserve-root --recursive --interactive=never "$release_root_path" &>"${output_file}" || {
             error_with_output_file "$output_file" "Server $hostname: Unable to remove release root path $release_root_path."
 
             return 1
@@ -37,7 +37,7 @@ function delete_application
     # lastly (before the main removal) we remove the shared_root_path which should not have anything depending on it.
     if [[ -e "$shared_root_path" ]]
     then
-        rm --preserve-root --recursive "$shared_root_path" &>"${output_file}" || {
+        rm --preserve-root --recursive --interactive=never "$shared_root_path" &>"${output_file}" || {
             error_with_output_file "$output_file" "Server $hostname: Unable to remove shared root path $shared_root_path."
 
             return 1
@@ -57,7 +57,7 @@ function delete_application
             warning "After removing every items managed by the deployment tools, we found some extra files in the deploy_to ($deploy_to) folder." \
                     "Hence we did not delete the folder in order to let you choose what you want to do with those files."
         else
-            rm --preserve-root --recursive "$deploy_to" &>"${output_file}" || {
+            rm --preserve-root --recursive --interactive=never "$deploy_to" &>"${output_file}" || {
                 error_with_output_file "$output_file" "Server $hostname: Unable to remove deploy_to path $deploy_to."
 
                 return 1

@@ -2,7 +2,7 @@
 all: compile
 
 clean:
-	[ -d compiled ] && rm --recursive compiled || true
+	[ -d compiled ] && rm --recursive --interactive=never compiled || true
 
 compile: compiled/deploy
 
